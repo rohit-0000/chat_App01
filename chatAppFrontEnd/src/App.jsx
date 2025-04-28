@@ -1,0 +1,142 @@
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+import "./App.css";
+import Login from "./Components/login";
+import Signup from "./Components/signup";
+import Forgot_pass from "./Components/forgot_pass";
+import Otp_verify from "./Components/otp_verify";
+import Home from "./Components/home";
+import Change_password from "./Components/change_password";
+import Profile from "./Components/profile";
+import AI from "./Components/ai"
+import NavBar from "./Components/NavBar";
+import GroupInfo from "./Components/groupInfo";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { connectToAllRooms } from "./Utils/websocket";
+import { addMessageToGroup } from "./Reducer/chatSlice";
+
+function App() {
+  // const token = localStorage.getItem("chatAppToken");
+  const token = useSelector((state) => state.chatApp.token);
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: token ? (
+        <Navigate to="/home" />
+      ) : (
+        <div>
+          <Login />
+        </div>
+      ),
+    },
+    {
+      path: "/signup",
+      element: token ? (
+        <Navigate to="/home" />
+      ) : (
+        <div>
+          <Signup />
+        </div>
+      ),
+    },
+    {
+      path: "/forgot-password",
+      element: (
+        <div>
+          <Forgot_pass />
+        </div>
+      ),
+    },
+    {
+      path: "/verify-otp",
+      element: (
+        <div>
+          <Otp_verify />
+        </div>
+      ),
+    },
+    {
+      path: "/change-pass",
+      element: token ? (
+        <Navigate to="/home" />
+      ) : (
+        <div>
+          <Change_password />
+        </div>
+      ),
+    },
+    {
+      path: "/home",
+      element: token ? (
+        <div>
+          <NavBar />
+          <Home />
+        </div>
+      ) : (
+        <Navigate to={"/"} />
+      ),
+      // element: <Home/> ,
+    },
+    {
+      path: "/profile",
+      element: token ? (
+        <div>
+          <NavBar />
+          <Profile />
+        </div>
+      ) : (
+        <Navigate to={"/"} />
+      ),
+    },
+    {
+      path: "/ai",
+      element: token ? (
+        <div>
+          <NavBar />
+          <AI/>
+        </div>
+      ) : (
+        <Navigate to={"/"} />
+      ),
+    },
+    {
+      path: "/groupInfo",
+      element: token ? (
+        <div>
+          <NavBar />
+          <GroupInfo/>
+
+        </div>
+      ) : (
+        <Navigate to={"/"} />
+      ),
+    },
+  ]);
+  const dispatch = useDispatch();
+  const roomIds = useSelector((state) => state.chatApp.user?.group?.map((g) => g.roomKey));
+  
+  useEffect(() => {
+      const client=connectToAllRooms(roomIds, (roomId, message) => {
+        dispatch(addMessageToGroup({ roomId, message }));
+      });    
+      return () => {
+        if (client && client.connected) {
+          client.disconnect();
+        }
+      };
+    
+  }, [roomIds]); 
+  
+  return (
+    <div className="text-white">
+      <RouterProvider router={router} />
+      {/* <Otp_verify/> */}
+    </div>
+  );
+}
+
+export default App;
