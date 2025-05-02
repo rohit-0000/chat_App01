@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "../app.css";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
