@@ -3,7 +3,6 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import "./App.css";
 import Login from "./Components/login";
 import Signup from "./Components/signup";
 import Forgot_pass from "./Components/forgot_pass";
