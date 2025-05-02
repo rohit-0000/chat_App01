@@ -2,7 +2,7 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
 let client = null;
-export const connectToAllRooms = (roomIds, onMessageReceived) => {
+export const connectToAllRooms = (roomIds, onMessageReceived, onMessageDeleted,onRoomDeleted) => {
   const socket = new SockJS("http://localhost:8080/chat");
   
   client = Stomp.over(() => socket);
@@ -14,6 +14,17 @@ export const connectToAllRooms = (roomIds, onMessageReceived) => {
         onMessageReceived(roomId, JSON.parse(message.body));
         console.log(message);
       });
+
+      client.subscribe(`/topic/room/${roomId}/delete`, (message) => {
+        const deletedMessageId = message.body;
+          onMessageDeleted(roomId, deletedMessageId); 
+        
+      });
+
+      client.subscribe("/topic/chatroom/delete",(message)=>{
+        const roomKey=message.body;
+        onRoomDeleted(roomKey);
+      })
     });
   });
   

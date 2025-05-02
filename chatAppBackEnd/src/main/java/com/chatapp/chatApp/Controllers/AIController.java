@@ -4,6 +4,7 @@ package com.chatapp.chatApp.Controllers;
 import com.chatapp.chatApp.Entity.User;
 import com.chatapp.chatApp.Repository.UserRepo;
 import com.chatapp.chatApp.Services.AIService;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,12 +26,16 @@ public class AIController {
     @Autowired
     private UserRepo userRepo;
     @PostMapping("/ask")
-    public ResponseEntity<String> askQuestion(@RequestBody Map<String,String> payload){
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        String userName=authentication.getName();
-        User user=userRepo.findByUserName(userName);
-        String question = payload.get("question");
-        String answere=aiService.getAnswere(question,user);
-        return  new ResponseEntity<>(answere, HttpStatus.OK);
+    public ResponseEntity<?> askQuestion(@RequestBody String question){
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            User user = userRepo.findByUserName(userName);
+            Map<ObjectId, List<String>> answer = aiService.getAnswere(question, user);
+            return new ResponseEntity<>(answer, HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>("Unexpected error",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

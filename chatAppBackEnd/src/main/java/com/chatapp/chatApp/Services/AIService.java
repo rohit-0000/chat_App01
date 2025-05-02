@@ -2,6 +2,7 @@ package com.chatapp.chatApp.Services;
 
 import com.chatapp.chatApp.Entity.User;
 import com.chatapp.chatApp.Repository.UserRepo;
+import org.bson.types.ObjectId;
 import org.cloudinary.json.JSONArray;
 import org.cloudinary.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class AIService {
@@ -30,10 +30,10 @@ public class AIService {
         this.webClient = webClient.build();
     }
 
-    public String getAnswere(String question, User user){
+    public Map<ObjectId, List<String>> getAnswere(String question, User user){
 
         //        Construct Request as gemini accept in particular manner
-        Map<String , Object> requestBody=Map.of("contents",new Object[]{Map.of("parts",new Object[]{Map.of("text",question)})});
+        Map<String , Object> requestBody=Map.of("contents",new Object[]{Map.of("parts",new Object[]{Map.of("text",question + " give in short")})});
 
         //        API call
         String response =webClient.post()
@@ -52,8 +52,10 @@ public class AIService {
                 .getJSONArray("parts")
                 .getJSONObject(0)
                 .getString("text");
-        user.getAiQna().put(question,text);
+        ObjectId obj=new ObjectId();
+        user.getAiQna().put(obj, new ArrayList<>(Arrays.asList(question, text)));
+
         userRepo.save(user);
-        return text;
+        return Map.of(obj,new ArrayList<>(Arrays.asList(question, text)));
     }
 }

@@ -4,13 +4,15 @@ import ChatImg from "../assets/Chat.svg";
 import logout from "../assets/logout.svg";
 import AiImg from "../assets/aiImg.svg";
 import { NavLink } from "react-router";
-import { getUserDetail } from "../Reducer/chatSlice";
+import { getRoomMembers, getUserDetail } from "../Reducer/chatSlice";
+import ChatAppLogo from "../assets/chatAppLogo.png"
 import { useDispatch, useSelector } from "react-redux";
 const NavBar = () => {
   const [isNavBarExpanded, setIsNavBarExpanded] = useState(false);
   const dispatch = useDispatch();
   const navBarRef = useRef(null);
   const user = useSelector((state) => state.chatApp.user);
+  const [loading,setLoading]=useState(false);
   function handleNavBar() {
     setIsNavBarExpanded((prev) => !prev);
   }
@@ -33,23 +35,39 @@ const NavBar = () => {
     };
   }, []);
 
+  // Fetch user details once on mount
   useEffect(() => {
+    setLoading(true);
     dispatch(getUserDetail());
-  }, [dispatch]);
+    setLoading(false);
+  }, []);
+
+  // When user is updated, fetch room members
+  useEffect(() => {
+    setLoading(true);
+    if (user?.group) {
+      user.group.forEach((group) => {
+        dispatch(getRoomMembers(group?.roomKey));
+      });
+      setLoading(false);
+    }
+  }, [user]);
+
   return (
     <div
       ref={navBarRef}
       className={`${
         isNavBarExpanded ? "w-[200px]" : "w-14"
-      } h-screen border-r fixed top-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 `}
+      } h-screen border-r fixed top-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
     >
+      <div className={`absolute inset-0 flex justify-center items-center bg-slate-950  ${loading?"opacity-100 w-screen h-screen top-0 left-0":"opacity-0 w-0 h-0 overflow-hidden top-1/2 left-[50vw]"} `}><img src={ChatAppLogo} className="p-50 "/></div>
       {/* Upper Nav */}
       <div className="flex flex-col gap-5 w-full ">
         {/* NavButton */}
         <button
           className={`flex justify-center gap-2 items-center cursor-pointer rounded  active:scale-95 ${
             isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
-          } p-0.5 text-3xl`}
+          } p-0.5 text-3xl transition-all duration-500 ease-linear`}
           onClick={handleNavBar}
         >
           ☰
@@ -62,11 +80,11 @@ const NavBar = () => {
               isActive ? "bg-blue-600" : ""
             }  ${
               isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
-            } p-0.5`
+            } p-0.5 transition-all duration-500 ease-linear`
           }
         >
           <img src={ChatImg} className="  max-w-10 max-h-10 " />
-          {isNavBarExpanded && <div className="text-xl"> Chats </div>}
+          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> Chats </div>
         </NavLink>
         {/* jm */}
         <NavLink
@@ -76,11 +94,11 @@ const NavBar = () => {
               isActive ? "bg-blue-600" : ""
             }  ${
               isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
-            } p-0.5`
+            } p-0.5 transition-all duration-500 ease-linear`
           }
         >
           <img src={AiImg} className="  max-w-11 max-h-11 " />
-          {isNavBarExpanded && <div className="text-xl"> AI </div>}
+          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> AI </div>
         </NavLink>
       </div>
 
@@ -94,23 +112,23 @@ const NavBar = () => {
               isActive ? "bg-blue-900" : ""
             }  ${
               isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
-            } p-0.5`
+            } p-0.5 transition-all duration-500 ease-linear`
           }
         >
           <img
             src={user?.userImageUrl || defaultUserImg}
-            className=" w-10 h-10 object-cover rounded-full p-0.5"
+            className=" w-10 h-10 object-cover rounded-full p-0.5 aspect-[1/1]"
           />
-          {isNavBarExpanded && <div className="text-xl"> Profile </div>}
+          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> Profile </div>
         </NavLink>
         {/* Logout */}
         <div
           className={`flex justify-center gap-2 items-center cursor-pointer hover:bg-red-500 rounded  active:scale-95   ${
             isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
-          } p-0.5`}
+          } `}
         >
           <img src={logout} className=" max-w-10 max-h-10 p-1 ml-1" />
-          {isNavBarExpanded && <div className="text-xl"> Logout </div>}
+          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`} onClick={HandleLogOut}> Logout </div>
         </div>
       </div>
     </div>

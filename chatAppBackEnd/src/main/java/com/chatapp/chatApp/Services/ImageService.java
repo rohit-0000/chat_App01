@@ -5,14 +5,13 @@ import com.chatapp.chatApp.Entity.User;
 import com.chatapp.chatApp.Repository.ChatRoomRepo;
 import com.chatapp.chatApp.Repository.UserRepo;
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ImageService {
@@ -44,7 +43,7 @@ public class ImageService {
 
     public String uploadImage(MultipartFile file, User user,String groupId) throws IOException {
         Optional<ChatRoom> room=chatRoomRepo.findById(groupId);
-        if(room.isEmpty() || !room.get().getAdmin().contains(user.getId())) return "";
+        if(room.isEmpty() || !room.get().getAdmin().contains(user.getId().toHexString())) return "";
         deleteImg(user,groupId);
         Map<String,String> upload=cloudinary.uploader().upload(file.getBytes(),new HashMap<>());
         String fileUrl= upload.get("url");
@@ -57,7 +56,7 @@ public class ImageService {
     }
     public void deleteImg(User user,String groupId) throws IOException {
         Optional<ChatRoom> room=chatRoomRepo.findById(groupId);
-        if(room.isEmpty() || !room.get().getAdmin().contains(user.getId())) throw new IOException("You are not authorized to change image");
+        if(room.isEmpty() || !room.get().getAdmin().contains(user.getId().toHexString())) throw new IOException("You are not authorized to change image");
         if(room.get().getGroupImageUrl()!=null && !room.get().getGroupImageUrl().isEmpty()){
             cloudinary.uploader().destroy(room.get().getPublic_id(),new HashMap<>());
             room.get().setPublic_id(groupId);
@@ -66,4 +65,19 @@ public class ImageService {
             userRepo.save(user);
         }
     }
+
+    public List<String> uploadFile(MultipartFile chatFile) throws IOException {
+        Map<String,String> upload=cloudinary.uploader().upload(
+                chatFile.getBytes(),
+                ObjectUtils.asMap("resource_type", "auto")
+        );
+        String fileUrl= upload.get("url");
+        String publidId=upload.get("public_id");
+        return new ArrayList<>(Arrays.asList(fileUrl,publidId));
+    }
+
+    public void deleteImg(String public_id) throws IOException {
+            cloudinary.uploader().destroy(public_id,new HashMap<>());
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.chatapp.chatApp.Entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Document(collection = "user")
 public class User {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
     @Indexed(unique = true)
@@ -35,7 +38,7 @@ public class User {
     @NonNull
     private String password;
 
-    private Map<String,String> aiQna=new HashMap<>();
+    private Map<ObjectId,List<String>> aiQna=new HashMap<>();
 
     private String about="";
 

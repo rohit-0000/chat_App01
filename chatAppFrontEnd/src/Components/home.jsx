@@ -1,24 +1,29 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Navigate, NavLink, useNavigate } from "react-router";
 import CreateImg from "../assets/createImg.svg";
 import SearchImg from "../assets/searchImg.svg";
 import JoinGroupImg from "../assets/joinGroupImg.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { useForm } from "react-hook-form";
 import DefaultGroup from "../assets/defaultGroup.svg";
 import GroupEditImg from "../assets/groupEditImg.svg";
 import defaultUserImg from "../assets/DefaultUser.svg";
 import BackImg from "../assets/backImg.svg";
 import sendImg from "../assets/sendImg.svg";
+import videoCall from "../assets/videoCall.svg";
+import audioCall from "../assets/audioCall.svg";
 import CreateGroup from "./createGroup";
 import JoinGroup from "./joinGroup";
 import GroupInfo from "./groupInfo";
 import { sendMessage } from "../Utils/websocket";
+import AddImg from "../assets/addImg.svg";
+import { deleteChat, sendMedia } from "../Reducer/chatSlice";
+import downloadImg from "../assets/downloadImg.svg";
+import fileImg from "../assets/fileImg.svg";
+import DeleteImg from "../assets/deleteImg.svg";
+
 const Home = () => {
   const leftBoxRef = useRef(null);
   const rightBoxRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.chatApp.user);
   const [roomCreateForm, setRoomCreateForm] = useState(false);
   const [roomJoinForm, setRoomJoinForm] = useState(false);
@@ -31,11 +36,32 @@ const Home = () => {
   const [OpenGroupInfo, setOpenGroupInfo] = useState(false);
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
+  const [fullImg, setFullImg] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 640);
+  const [search, setSearch] = useState("");
+  const filteredGroups = user?.group?.filter((grp) =>
+    grp?.roomName?.toLowerCase().includes(search.toLowerCase())
+  );
+  const [preview, setPreview] = useState(null);
+  const [fileType, setFileType] = useState("");
+  const [file, setFile] = useState(null);
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [toDeleteChat, setToDeleteChat] = useState(null);
 
-  const [sizes, setSizes] = useState(() => {
-    const savedSizes = JSON.parse(localStorage.getItem("boxSizes"));
-    return savedSizes || { left: 30, right: 70 };
-  });
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const [sizes, setSizes] = useState({ left: 30, right: 70 });
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setSizes({ left: 100, right: 100 });
+    }
+  }, [isSmallScreen]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -46,36 +72,55 @@ const Home = () => {
   }, [sizes]);
 
   const handleMouseDown = () => {
-    setIsDragging(true); // Set dragging state to true
+    setIsDragging(true);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener(
       "mouseup",
       () => {
         document.removeEventListener("mousemove", handleMouseMove);
-        setIsDragging(false); // Reset dragging state
+        setIsDragging(false);
       },
       { once: true }
     );
   };
 
   const handleMouseMove = (e) => {
+    const totalWidth = window.innerWidth;
+    const newLeftWidth =
+      ((leftBoxRef.current.offsetWidth + e.movementX) / totalWidth) * 100;
+    const newRightWidth =
+      ((rightBoxRef.current.offsetWidth - e.movementX) / totalWidth) * 100;
     setSizes({
-      left: `${leftBoxRef.current.offsetWidth + e.movementX}vw`,
-      right: `${rightBoxRef.current.offsetWidth - e.movementX}vw`,
+      left: newLeftWidth,
+      right: newRightWidth,
     });
   };
   function handleSendMessage() {
-    if (message === "" || message === null) return;
-    const msg = {
-      senderId: user.id,
-      message: message,
-      time: new Date().toISOString(),
-      senderName: user.name,
-      senderImg: user.userImageUrl,
-    };
-    sendMessage(groupNo, msg);
-    setMessage("");
-    textareaRef.current.style.height = "auto"; 
+    if (message === "" && file === null) return;
+    if (file !== null) {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("chatFile", file);
+      dispatch(sendMedia({ MediaData: formData, groupId: groupNo })).then(
+        () => {
+          setFile(null);
+          setFileType(null);
+          setPreview(null);
+          setLoading(false);
+        }
+      );
+    } else {
+      const msg = {
+        senderId: user.id,
+        message: message,
+        time: new Date().toISOString(),
+        senderName: user.name,
+        senderImg: user.userImageUrl,
+      };
+      sendMessage(groupNo, msg);
+      setMessage("");
+      textareaRef.current.style.height = "auto";
+    }
   }
   useEffect(() => {
     const handleClickOutside_CreateRoom = (event) => {
@@ -127,21 +172,157 @@ const Home = () => {
     };
   }, [roomCreateForm, roomJoinForm, addGroup, OpenGroupInfo]);
 
+  const renderPreview = () => {
+    if (!preview) return null;
+
+    if (fileType.startsWith("image/")) {
+      return <img src={preview} alt="preview" style={{ maxWidth: "300px" }} />;
+    } else if (fileType.startsWith("audio/")) {
+      return <audio controls src={preview} />;
+    } else if (fileType.startsWith("video/")) {
+      return <video controls src={preview} style={{ maxWidth: "300px" }} />;
+    } else if (fileType === "application/pdf") {
+      return (
+        <iframe src={preview} width="300" height="400" title="PDF Preview" />
+      );
+    } else if (
+      file.name.endsWith(".doc") ||
+      file.name.endsWith(".docx") ||
+      file.name.endsWith(".ppt") ||
+      file.name.endsWith(".pptx")
+    ) {
+      return <p className="bg-blue-400 rounded-2xl p-5">{file.name}</p>;
+    } else {
+      return <p>Unsupported file type</p>;
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) return;
+
+    const url = URL.createObjectURL(selectedFile);
+    setFileType(selectedFile.type);
+    setPreview(url);
+    setFile(selectedFile);
+  };
+
+  function getFileType(url) {
+    const extension = url.split(".").pop().split("?")[0].toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension))
+      return "image";
+    if (["mp4", "webm", "ogg"].includes(extension)) return "video";
+    if (["mp3", "wav", "aac"].includes(extension)) return "audio";
+    if (["pdf"].includes(extension)) return "pdf";
+    return "unknown";
+  }
+  function showMediaChat(url) {
+    {
+      const type = getFileType(url);
+      if (type === "image")
+        return (
+          <div className="relative">
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-5 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: "download",
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+            <a href={url} target="_blank">
+              <img
+                src={url}
+                className="w-50 md:w-80 px-1 py-2 rounded-2xl cursor-pointer"
+              />
+            </a>
+          </div>
+        );
+      if (type === "video")
+        return (
+          <video src={url} controls className="w-50 md:w-80 rounded-2xl" />
+        );
+      if (type === "audio")
+        return <audio src={url} controls className="w-60 md:w-80 " />;
+      if (type === "pdf") {
+        return (
+          <div className="relative">
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-7 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: "download",
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+            <iframe src={url} className="w-55 md:w-75 h-90 cursor-pointer" />
+            <a href={url} className="border px-2 py-1 rounded-xl bg-blue-600">
+              Open Pdf
+            </a>
+          </div>
+        );
+      }
+      // for unknown type
+      return (
+        <a href={url}>
+          <img src={fileImg} className="w-50" />
+        </a>
+      );
+    }
+  }
   return (
-    <div className="overflow-hidden h-screen max-w-screen p-2 flex gap-1 relative ">
+    <div
+      className={`overflow-hidden h-screen w-screen ${
+        !fullImg && "p-2"
+      } flex gap-1 relative `}
+    >
+      {/* full image */}
+
+      <div
+        className={`${
+          fullImg
+            ? "w-screen h-screen opacity-100 scale-100 left-0"
+            : "left-1/2 w-0 h-0 overflow-hidden opacity-0 scale-0 "
+        } bg-slate flex justify-center items-center z-99  backdrop-blur-2xl transition-all duration-500 ease-in-out absolute `}
+      >
+        <img
+          src={BackImg}
+          className="absolute w-10 top-4 left-4 cursor-pointer"
+          onClick={() => setFullImg(false)}
+        />
+        <img
+          src={
+            user?.group?.find((grp) => grp?.roomKey === groupNo)
+              ?.groupImageUrl || DefaultGroup
+          }
+          className="aspect-[1/1] max-w-full max-h-full object-cover p-2 rounded-2xl"
+        />
+      </div>
       {/* Main Box */}
-      <div className="flex rounded-2xl h-full w-fit overflow-hidden border-white pl-14 gap-0">
+      <div className="flex rounded-2xl h-full w-full overflow-hidden border-white pl-14 gap-0">
         {/* left Box */}
         <div
           ref={leftBoxRef}
-          className={`h-full min-w-70 relative rounded-l-2xl bg-[#fff1d53a] ${
+          className={`h-full  relative rounded-l-2xl bg-[#fff1d53a] ${
             groupNo !== null && "hidden md:flex"
-          } flex flex-col justify-center gap-2 `}
-          style={{ width: sizes.left }}
+          } flex flex-col justify-center gap-2 min-w-80 `}
+          style={
+            !isSmallScreen ? { width: `${sizes.left}vw` } : { width: "100%" }
+          }
         >
           {/* left top */}
           <div className="flex flex-col gap-2">
-            <div className="w-full h-18 rounded-tl-2xl flex justify-between items-center px-4 border-b-8 border-slate-950 relative">
+            <div className="w-full h-18 rounded-tl-2xl flex justify-between items-center px-4 border-b-8 border-slate-950 relative ">
               <h1 className="text-2xl font-bold">Chats</h1>
               {/* create or join group button */}
               <button
@@ -182,31 +363,59 @@ const Home = () => {
             <div className="mx-3 bg-slate-950 rounded-xl flex items-center px-2">
               <img src={SearchImg} className="h-7" />
               <input
-                className="w-full h-12 pl-2 text-xl outline-0 rounded-xl"
+                className="w-full h-12 pl-2 text-xl outline-0 rounded-xl "
                 placeholder="Search"
-              ></input>
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search != "" && (
+                <p
+                  className="text-gray-500 font-extrabold text-2xl cursor-pointer"
+                  onClick={() => setSearch("")}
+                >
+                  &#10005;
+                </p>
+              )}
             </div>
           </div>
 
           {/* groups */}
           <div className="w-full h-full rounded-bl-2xl p-2 flex flex-col gap-1 ">
-            {user?.group?.map((grp, index) => (
-              <div
-                key={index}
-                className={`flex gap-1 items-center ${
-                  grp.roomKey === groupNo && "bg-slate-900 rounded-xl"
-                } p-1`}
-                onClick={() => {
-                  setGroupNo(grp?.roomKey);
-                }}
-              >
-                <img
-                  src={grp?.groupImageUrl || DefaultGroup}
-                  className="w-12 h-12 object-cover rounded-full p-1 "
-                />
-                {grp.roomName}
-              </div>
-            ))}
+            {Array.isArray(filteredGroups) && filteredGroups.length > 0 ? (
+              filteredGroups
+                .slice()
+                .sort((a, b) => {
+                  const timeA = new Date(
+                    a.chat?.[a.chat.length - 1]?.time || a.createdAt
+                  );
+                  const timeB = new Date(
+                    b.chat?.[b.chat.length - 1]?.time || b.createdAt
+                  );
+                  return timeB - timeA;
+                })
+                .map(
+                  (grp, index) =>
+                    grp && (
+                      <div
+                        key={index}
+                        className={`flex gap-1 items-center ${
+                          grp.roomKey === groupNo && "bg-slate-900 rounded-xl"
+                        } p-1 transition-all duration-500 ease-out`}
+                        onClick={() => {
+                          setGroupNo(grp?.roomKey);
+                        }}
+                      >
+                        <img
+                          src={grp?.groupImageUrl || DefaultGroup}
+                          className="w-12 h-12 object-cover rounded-full p-1 "
+                        />
+                        {grp.roomName}
+                      </div>
+                    )
+                )
+            ) : (
+              <p className="text-center text-gray-500">No groups available</p>
+            )}
           </div>
 
           {/* center line */}
@@ -239,17 +448,19 @@ const Home = () => {
         {/* rightBox */}
         <div
           ref={rightBoxRef}
-          className={`h-full  md:block  border-dotted rounded-l-2xl md:rounded-l-none rounded-r-2xl bg-[#ffffff2a] relative ${
+          className={`h-full  md:block  border-dotted rounded-l-2xl md:rounded-l-none rounded-r-2xl bg-[#ffffff2a] relative min-w-80 md:min-w-100 ${
             groupNo === null ? "hidden" : ""
-          }`}
-          style={{ width: sizes.right }}
+          } `}
+          style={
+            !isSmallScreen ? { width: `${sizes.right}vw` } : { width: "100%" }
+          }
         >
           {groupNo == null ? (
             ""
           ) : (
             <div className="flex flex-col justify-between h-full">
               {/* right top  */}
-              <div className="flex bg-[#02061892] h-22 rounded-tr-2xl  cursor-pointer">
+              <div className="flex bg-[#02061892] h-22 rounded-tr-2xl ">
                 {groupNo !== null && (
                   <button
                     onClick={() => {
@@ -261,103 +472,196 @@ const Home = () => {
                   </button>
                 )}
                 <div
-                  className="w-full flex items-center gap-3 pl-3"
+                  className="w-full flex items-center gap-3 px-5 justify-between"
                   onClick={() => {
                     setOpenGroupInfo(!OpenGroupInfo);
                   }}
                 >
-                  <img
-                    src={
-                      user?.group?.find((group) => group.roomKey === groupNo)
-                        ?.groupImageUrl || DefaultGroup
-                    }
-                    className="w-13 h-13 rounded-full object-cover"
-                  />
-                  <p>
-                    {
-                      user?.group?.find((group) => group.roomKey === groupNo)
-                        ?.roomName
-                    }
-                  </p>
+                  <div className="flex gap-3 items-center">
+                    <img
+                      src={
+                        user?.group?.find((group) => group?.roomKey === groupNo)
+                          ?.groupImageUrl || DefaultGroup
+                      }
+                      className="w-13 h-13 rounded-full object-cover"
+                    />
+                    <p>
+                      {
+                        user?.group?.find((group) => group?.roomKey === groupNo)
+                          ?.roomName
+                      }
+                    </p>
+                  </div>
+                  <div className="flex  border border-gray-500 rounded-xl px-2 py-1">
+                    <button className="border-r border-gray-500 pr-1.5 cursor-pointer">
+                      <img
+                        src={videoCall}
+                        className="w-10 mr-1.5 cursor-pointer"
+                      />
+                    </button>
+                    <button className=" pl-1.5 cursor-pointer border-l border-gray-500">
+                      <img src={audioCall} className="w-9" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {OpenGroupInfo === true && (
-                <div className="absolute top-2 left-2 bg-[#02061892] backdrop-blur-xl rounded-lg z-90">
-                  <GroupInfo
-                    group={user?.group?.find(
-                      (group) => group.roomKey === groupNo
-                    )}
-                    id={user.id}
-                    ref={groupInfoRef}
-                  />
-                </div>
-              )}
+              <div
+                className={`absolute top-2 left-2 bg-[#02061892] backdrop-blur-xl   overflow-y-scroll pr-5  ${
+                  OpenGroupInfo
+                    ? "opacity-100 h-120 w-80 left-0 rounded-lg"
+                    : "opacity-0 h-0 w-0 left-40 rounded-4xl no-scrollbar"
+                } transition-all duration-400 ease-in z-90`}
+              >
+                <GroupInfo
+                  group={user?.group?.find(
+                    (group) => group?.roomKey === groupNo
+                  )}
+                  id={user.id}
+                  ref={groupInfoRef}
+                  setGroupNo={setGroupNo}
+                  groupNo={groupNo}
+                  setFullImg={setFullImg}
+                  OpenGroupInfo={OpenGroupInfo}
+                  user={user}
+                />
+              </div>
 
               {/* chat */}
               <div className="h-full px-3 py-2 flex flex-col-reverse gap-3 overflow-y-scroll  no-scrollbar w-full">
                 {user?.group
-                  ?.find((group) => group.roomKey === groupNo)
+                  ?.find((group) => group?.roomKey === groupNo)
                   ?.chat?.slice()
                   .reverse()
                   .map((m, index) => (
                     <div
                       key={index}
                       className={`${
-                        m?.senderId?.timestamp === user?.id.timestamp &&
-                        user.id.date === m.senderId.date
+                        user.id === m?.senderId
                           ? "self-end flex-row-reverse"
                           : "self-start"
-                      } w-[50%] text-white flex `}
+                      } w-fit text-white flex gap-5 `}
+                      onMouseEnter={() => {
+                        setToDeleteChat(m.id);
+                      }}
+                      onMouseLeave={() => {
+                        setToDeleteChat(null);
+                      }}
                     >
-                      {m?.senderId?.timestamp !== user?.id.timestamp &&
-                        user.id.date !== m.senderId.date&&
-                      <img
-                        src={m.senderImg || defaultUserImg}
-                        className="w-10 h-10 object-cover rounded-full bg-slate-950 mr-2"
-                      />}
-                      <div
-                        className={`${
-                          m?.senderId?.timestamp === user?.id.timestamp &&
-                          user.id.date === m.senderId.date
-                            ? "bg-gradient-to-r from-indigo-800  to-purple-800 rounded-tr-none"
-                            : "bg-blue-950 rounded-tl-none"
-                        } w-fit rounded-xl `}
-                      >
-                        <div className="">
-                          <div className="text-xs italic text-amber-400 pl-2 pt-2">
-                            ~{m?.senderName && m.senderName}
+                      <div className="flex">
+                        {user.id !== m.senderId && (
+                          <img
+                            src={m.senderImg || defaultUserImg}
+                            className="w-10 h-10 object-cover rounded-full bg-slate-950 mr-2"
+                          />
+                        )}
+                        <div
+                          className={`${
+                            m?.senderId === user?.id
+                              ? "bg-gradient-to-r from-indigo-800  to-purple-800 rounded-tr-none"
+                              : "bg-blue-950 rounded-tl-none"
+                          } w-fit rounded-xl `}
+                        >
+                          <div className="">
+                            <div className="text-xs italic text-amber-400 pl-2 pt-2 ">
+                              ~{m?.senderName && m.senderName}
+                            </div>
+                            {m.public_Id ? (
+                              <div className="p-2 rounded-2xl">
+                                {showMediaChat(m?.message)}
+                              </div>
+                            ) : (
+                              <div className="whitespace-pre-wrap w-fit px-5 py-2">
+                                {m?.message}
+                              </div>
+                            )}
                           </div>
-
-                          <div className="whitespace-pre-wrap w-fit px-5 py-2">
-                            {m?.message}
-                          </div>
-
-                          
                         </div>
+                      </div>
+                      <div className="flex items-center">
+                        {!OpenGroupInfo &&
+                          toDeleteChat === m.id &&
+                          (m.senderId === user.id ||
+                            user.group
+                              .find((grp) => grp.roomKey === groupNo)
+                              .admin.find((id) => id === user.id)) && (
+                            <img
+                              src={DeleteImg}
+                              className="h-6 active:scale-90 cursor-pointer"
+                              onClick={() => {
+                                const body = {
+                                  id: toDeleteChat,
+                                  roomKey: groupNo,
+                                };
+                                dispatch(deleteChat(body));
+                              }}
+                            />
+                          )}
                       </div>
                     </div>
                   ))}
               </div>
 
               {/* send message */}
-              <div className="bg-slate-900 h-fit rounded-br-2xl flex justify-between ">
+              <div className="bg-slate-900 h-fit rounded-br-2xl flex justify-between items-center relative">
+                <div>
+                  <label>
+                    <input
+                      type="file"
+                      className="hidden"
+                      disabled={file}
+                      onChange={handleFileChange}
+                    />
+                    {!file && <img src={AddImg} className="h-10 px-2" />}
+                    {file && (
+                      <p
+                        className="h-10 w-10 px-2 font-bold text-3xl"
+                        onClick={(e) => {
+                          setFileType(null);
+                          setPreview(null);
+                          setFile(null);
+                        }}
+                      >
+                        &#10005;
+                      </p>
+                    )}
+                  </label>
+                  <div
+                    className={`absolute bottom-20 left-2 rounded overflow-hidden border-y-10 border-x-5 border-gray-600 bg-gray-600 flex ${
+                      !file && "hidden"
+                    }`}
+                  >
+                    {renderPreview()}
+                    {loading && (
+                      <div className="absolute h-full w-full flex justify-center items-center">
+                        <div
+                          className="w-10 h-10 border-5 border-transparent animate-spin  border-t-red-400 rounded-full"
+                          div
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <textarea
                   placeholder="Type a message "
-                  className="w-full resize-none outline-0 px-2 my-2 max-h-50"
+                  className="w-full resize-none outline-0 px-3 my-2 max-h-50"
                   rows={2}
                   value={message}
                   onInput={(e) => {
                     e.target.style.height = `auto`;
                     e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
+                  disabled={file}
                   ref={textareaRef}
                   onChange={(e) => {
                     setMessage(e.target.value);
                   }}
                 />
                 <button onClick={handleSendMessage}>
-                  <img src={sendImg} className="h-8  mr-2"></img>
+                  <img
+                    src={sendImg}
+                    className="h-8  mr-2 active:scale-90"
+                  ></img>
                 </button>
               </div>
             </div>

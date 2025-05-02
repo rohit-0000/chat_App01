@@ -1,4 +1,4 @@
-import React, { useRef, useState} from "react";
+import React, { useRef, useState } from "react";
 import AddImg from "../assets/addImg.svg";
 import SideBarImg from "../assets/sideBarImg.svg";
 import SendImg from "../assets/sendImg.svg";
@@ -10,16 +10,17 @@ const ai = () => {
   const dispatch = useDispatch();
   const [question, setQuestion] = useState("");
   const qna = useSelector((state) => state.chatApp.user)?.aiQna;
+  const [loading, setLoading] = useState(false);
   const textareaRef = useRef(null);
   function handleSend(e) {
     e.preventDefault();
-    const payload = { question: question };
-    dispatch(ChatAi(payload));
+    setLoading(true);
+    dispatch(ChatAi(question)).then(() => setLoading(false));
     setQuestion("");
-    textareaRef.current.style.height = "auto"; 
+    textareaRef.current.style.height = "auto";
   }
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-screen ">
       <div className="pl-14 w-full h-full p-0 flex flex-col justify-between gap-2 ">
         {/* header */}
         <div className="flex justify-between w-full rounded-2xl px-5">
@@ -30,40 +31,49 @@ const ai = () => {
         </div>
 
         {/* body  */}
-        <div className="h-full overflow-x-hidden flex flex-col-reverse">
+        <div className="h-full overflow-x-hidden flex flex-col-reverse relative ">
           {qna ? (
-            Object.entries(qna).reverse().map(([question, answer], index) => (
-              <div key={index}>
-                <div className="mb-6 p-4 rounded shadow flex flex-col gap-2">
-                  <h3
-                    className="bg-gradient-to-r from-indigo-800  to-purple-800 rounded-tr-none
+            Object.entries(qna)
+              .reverse()
+              .map(([key,question]) => (
+                <div key={key}>
+                  <div className="mb-6 p-4 rounded shadow flex flex-col gap-2">
+                    <h3
+                      className="bg-gradient-to-r from-indigo-800  to-purple-800 rounded-tr-none
                  w-fit rounded-xl self-end px-5 py-2.5 "
-                  >
-                    {question}
-                  </h3>
-                  <div
-                    className=" rounded-tl-none
+                    >
+                      {question[0]}
+                    </h3>
+                    <div
+                      className=" rounded-tl-none
                  rounded-xl self-start px-5 py-2.5 whitespace-pre-wrap w-full break-words overflow-x-scroll bg-[#ffffff18] "
-                  >
-                    <ReactMarkdown>{DOMPurify.sanitize(answer)}</ReactMarkdown>
+                    >
+                      <ReactMarkdown>
+                        {DOMPurify.sanitize(question[1])}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))
           ) : (
             <p className="px-5">No AI QnA available.</p>
           )}
+          {loading &&
+          <div className="absolute bottom-0 w-full flex justify-center">
+                <div className="animate-[ping_0.5s_ease-in-out_infinite_0.2s] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 w-1/2 h-1 rounded-lg "/>
+            </div>
+            } 
         </div>
 
         {/* Message Input */}
-        <div className="w-full h-fit md:mb-5">
-          <label className="w-full flex justify-center">
-            <input type="file" className="hidden" />
+        <div className="w-full h-fit md:mb-5 flex justify-center">
+          {/* <label className="w-full flex justify-center">
+            <input type="file" className="hidden" /> */}
             <div className="w-full md:w-[80%] bg-neutral-700 md:rounded-2xl flex items-center ">
-              <img src={AddImg} className="h-12 p-1" />
+              {/* <img src={AddImg} className="h-12 p-1" /> */}
               <textarea
                 type="text"
-                className="w-full outline-0 my-2 px-2 text-2xl resize-none h-auto max-h-50"
+                className="w-full outline-0 my-2 px-2 pl-5 text-2xl resize-none h-auto max-h-50"
                 placeholder="Type a message"
                 value={question}
                 onChange={(e) => {
@@ -72,7 +82,6 @@ const ai = () => {
                 onInput={(e) => {
                   e.target.style.height = `auto`;
                   e.target.style.height = `${e.target.scrollHeight}px`;
-                  
                 }}
                 ref={textareaRef}
               />
@@ -83,7 +92,7 @@ const ai = () => {
                 <img src={SendImg} className="h-full p-2 pt-2 " />
               </button>
             </div>
-          </label>
+          {/* </label> */}
         </div>
       </div>
     </div>

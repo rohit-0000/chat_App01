@@ -17,7 +17,7 @@ import java.util.Optional;
 @Service
 public class UserServices {
    @Autowired
-   private UserRepo userRepo;
+   public UserRepo userRepo;
    @Autowired
    private ChatRoomService chatRoomService;
    private static final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();

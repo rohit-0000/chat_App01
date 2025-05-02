@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 const initialState = {
   user: localStorage.getItem("chatAppUserDetail"),
   token: localStorage.getItem("chatAppToken"),
+  friends: [],
 };
 
 export const loginUser = createAsyncThunk(
@@ -123,6 +124,34 @@ export const getUserDetail = createAsyncThunk(
     }
   }
 );
+export const getRoomMembers = createAsyncThunk(
+  "get/roomMembers",
+  async (roomKey, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      if (!token) {
+        console.error("Token is missing or invalid");
+      }
+      const response = await axios.get(
+        "http://localhost:8080/chatroom/get/roomMembers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            roomKey: roomKey,
+          },
+        }
+      );
+      return response.data;
+    } catch (e) {
+      if (e.response) {
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+);
 
 export const setProfileImg = createAsyncThunk(
   "user/setImg",
@@ -153,15 +182,16 @@ export const setProfileImg = createAsyncThunk(
 // Ai----------------------------------
 export const ChatAi = createAsyncThunk(
   "ai/ask",
-  async (payload, { rejectWithValue }) => {
+  async (question, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
         "http://localhost:8080/api/qna/ask",
-        payload,
+        question,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "text/plain",
           },
         }
       );
@@ -345,7 +375,7 @@ export const leaveGroup = createAsyncThunk(
           },
         }
       );
-      return (await response).data;
+      return roomKey;
     } catch (e) {
       if (e.response) {
         return rejectWithValue(e.response.data);
@@ -368,6 +398,31 @@ export const deleteGroup = createAsyncThunk(
           },
         }
       );
+      return roomKey;
+    } catch (e) {
+      if (e.response) {
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+);
+
+export const sendMedia = createAsyncThunk(
+  "send/media",
+  async ({ MediaData, groupId }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      const response = await axios.post(
+        `http://localhost:8080/sendMedia/${groupId}`,
+        MediaData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (e) {
       if (e.response) {
@@ -378,24 +433,113 @@ export const deleteGroup = createAsyncThunk(
   }
 );
 
+export const makeAdmin = createAsyncThunk(
+  "group/makeAdmin",
+  async (body, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      await axios.post("http://localhost:8080/chatroom/add-admin", body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return body;
+    } catch (e) {
+      if (e.response) {
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+);
+export const removeAdmin = createAsyncThunk(
+  "group/removeAdmin",
+  async (body, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      await axios.post("http://localhost:8080/chatroom/remove-admin", body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return body;
+    } catch (e) {
+      if (e.response) {
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+);
+export const removeMember = createAsyncThunk(
+  "group/removeMember",
+  async (body, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      await axios.post("http://localhost:8080/chatroom/remove-Member", body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return body;
+    } catch (e) {
+      if (e.response) {
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+);
+
+export const deleteChat =createAsyncThunk(
+  "chat/delete",
+  async(body,{rejectWithValue})=>{
+    try {
+      const token = localStorage.getItem("chatAppToken");
+      await axios.delete(`http://localhost:8080/chat/delete/${body.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "text/plain",
+        },
+        data:body.roomKey,
+      });
+      return body;
+    }catch(e){
+      if(e.response){
+        return rejectWithValue(e.response.data);
+      }
+      return rejectWithValue("Unexpected error");
+    }
+  }
+)
 export const chatSlice = createSlice({
   name: "chatApp",
   initialState,
   reducers: {
     addMessageToGroup: (state, action) => {
-  const { roomId, message } = action.payload;
+      const { roomId, message } = action.payload;
 
-  state.user.group = state.user.group.map((group) => {
-    if (group.roomKey === roomId) {
-      return {
-        ...group,
-        chat: [...group.chat, message],
-      };
+      state.user.group = state.user.group.map((group) => {
+        if (group.roomKey === roomId) {
+          return {
+            ...group,
+            chat: [...group.chat, message],
+          };
+        }
+        return group;
+      });
+    },
+    removeMessageFromGroup: (state, action) => {
+      const room = state.user.group.find((grp) => grp.roomKey === action.payload.roomKey);
+      if (room) {
+        room.chat = room.chat.filter((c) => c.id !== action.payload.id);
+      } else {
+        console.warn(`Room with roomKey ${action.payload.roomKey} not found.`);
+      }
+    },
+    removeChatRoom:(state,action) =>{
+      state.user.group=state.user.group.filter((g)=>g.roomKey!==action.payload)
     }
-    return group;
-  });
-},
-
   },
   extraReducers: (builder) => {
     builder
@@ -427,7 +571,6 @@ export const chatSlice = createSlice({
       })
       .addCase(findUser.fulfilled, (state, action) => {
         state.user = action.payload;
-        // toast.success("User Found");
       })
       .addCase(getUserDetail.fulfilled, (state, action) => {
         state.user = action.payload;
@@ -441,25 +584,21 @@ export const chatSlice = createSlice({
       })
       .addCase(setProfileImg.fulfilled, (state, action) => {
         state.user.userImageUrl = action.payload;
-        toast.success("Profile Image Changed");
       })
       .addCase(deleteProfileImg.fulfilled, (state) => {
         state.user.userImageUrl = null;
-        toast.success("Profile Image removed");
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
-        toast.success("user updated");
       })
       .addCase(updateUser.rejected, (state, action) => {
         toast.error(action.payload || "Error in creating user");
       })
       .addCase(ChatAi.fulfilled, (state, action) => {
-        const question = action.meta.arg.question;
-        const ans = action.payload;
-
-        state.user.aiQna[question] = ans;
-        toast.success("ai requese");
+        state.user.aiQna = {
+          ...state.user.aiQna,
+          ...action.payload, 
+        };
       })
       .addCase(ChatAi.rejected, (state, action) => {
         toast.error(action.payload || "Error in changing password");
@@ -478,18 +617,17 @@ export const chatSlice = createSlice({
       })
       .addCase(deleteGroup.fulfilled, (state, action) => {
         const roomKey = action.meta.arg;
-        const groupIndex = state.user.group.findIndex((id) => id === roomKey);
-        if (groupIndex !== -1) {
-          state.user.group.splice(groupIndex, 1);
-        }
+        state.user.group = state.user.group.filter(
+          (group) => group.roomKey !== roomKey
+        );
       })
       .addCase(leaveGroup.fulfilled, (state, action) => {
         const roomKey = action.meta.arg;
-        const groupIndex = state.user.group.findIndex((id) => id === roomKey);
-        if (groupIndex !== -1) {
-          state.user.group.splice(groupIndex, 1);
-        }
+        state.user.group = state.user.group.filter(
+          (group) => group.roomKey !== roomKey
+        );
       })
+
       .addCase(leaveGroup.rejected, (state, action) => {
         toast.error(action.payload || "Error in creating user");
       })
@@ -511,19 +649,53 @@ export const chatSlice = createSlice({
         const group = state.user.group.find((g) => g.roomKey === roomKey);
         if (group) {
           group.groupImageUrl = action.payload;
-          toast.success("Image Changed");
         }
       })
 
       .addCase(updateGroup.fulfilled, (state, action) => {
         state.user = action.payload;
-        toast.success("group updated");
       })
       .addCase(updateGroup.rejected, (state, action) => {
         toast.error(action.payload || "Error in creating user");
-      });
+      })
+      .addCase(getRoomMembers.fulfilled, (state, action) => {
+        state.friends = { ...state.friends, ...action.payload };
+      })
+      .addCase(sendMedia.fulfilled, () => {
+      })
+      .addCase(sendMedia.rejected, () => {
+        toast.error("nhi hua send");
+      })
+      .addCase(makeAdmin.fulfilled, (state, action) => {
+        const room = state.user.group.find(
+          (grp) => grp.roomKey === action.payload.roomKey
+        );
+        if (room) {
+          room.admin.push(action.payload.userId);
+        }
+      })
+      .addCase(removeAdmin.fulfilled, (state, action) => {
+        const room = state.user.group.find((grp) => grp.roomKey === action.payload.roomKey);
+        if (room) {
+            room.admin = room.admin.filter((id) => id !== action.payload.userId);
+        }
+    })
+    .addCase(removeMember.fulfilled,(state,action)=>{
+      const room = state.user.group.find((grp) => grp.roomKey === action.payload.roomKey);
+        if (room) {
+            room.admin = room.admin.filter((id) => id !== action.payload.userId);
+            room.member = room.member.filter((id) => id !== action.payload.userId);
+        }
+    })
+    .addCase(deleteChat.fulfilled,(state,action)=>{
+      const room = state.user.group.find((grp) => grp.roomKey === action.payload.roomKey);
+      room.chat=room.chat.filter((c)=>c.id!==action.payload.id)
+    })
+    .addCase(deleteChat.rejected,()=>{
+      toast.error("Some error in deleting");
+    })
   },
 });
 
 export default chatSlice.reducer;
-export const { addMessageToGroup } = chatSlice.actions;
+export const { addMessageToGroup,removeMessageFromGroup ,removeChatRoom } = chatSlice.actions;

@@ -11,16 +11,14 @@ import Otp_verify from "./Components/otp_verify";
 import Home from "./Components/home";
 import Change_password from "./Components/change_password";
 import Profile from "./Components/profile";
-import AI from "./Components/ai"
+import AI from "./Components/ai";
 import NavBar from "./Components/NavBar";
-import GroupInfo from "./Components/groupInfo";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { connectToAllRooms } from "./Utils/websocket";
-import { addMessageToGroup } from "./Reducer/chatSlice";
+import { addMessageToGroup, removeMessageFromGroup,removeChatRoom } from "./Reducer/chatSlice";
 
 function App() {
-  // const token = localStorage.getItem("chatAppToken");
   const token = useSelector((state) => state.chatApp.token);
   const router = createBrowserRouter([
     {
@@ -97,19 +95,7 @@ function App() {
       element: token ? (
         <div>
           <NavBar />
-          <AI/>
-        </div>
-      ) : (
-        <Navigate to={"/"} />
-      ),
-    },
-    {
-      path: "/groupInfo",
-      element: token ? (
-        <div>
-          <NavBar />
-          <GroupInfo/>
-
+          <AI />
         </div>
       ) : (
         <Navigate to={"/"} />
@@ -117,20 +103,33 @@ function App() {
     },
   ]);
   const dispatch = useDispatch();
-  const roomIds = useSelector((state) => state.chatApp.user?.group?.map((g) => g.roomKey));
-  
+  const roomIds = useSelector((state) =>
+    state.chatApp.user?.group?.map((g) => g?.roomKey)
+  );
+
   useEffect(() => {
-      const client=connectToAllRooms(roomIds, (roomId, message) => {
+    if (roomIds == null || roomIds === "") return;
+    const client = connectToAllRooms(
+      roomIds,
+      (roomId, message) => {
         dispatch(addMessageToGroup({ roomId, message }));
-      });    
-      return () => {
-        if (client && client.connected) {
-          client.disconnect();
-        }
-      };
-    
-  }, [roomIds]); 
-  
+      },
+      (roomId, deletedMessageId) => { // Pass the onMessageDeleted function
+        dispatch(
+          removeMessageFromGroup({ roomKey:roomId, id: deletedMessageId })
+        );
+      },
+      (roomKey)=>{
+        dispatch(removeChatRoom(roomKey))
+      }
+    );
+    return () => {
+      if (client && client.connected) {
+        client.disconnect();
+      }
+    };
+  }, [roomIds]);
+
   return (
     <div className="text-white">
       <RouterProvider router={router} />

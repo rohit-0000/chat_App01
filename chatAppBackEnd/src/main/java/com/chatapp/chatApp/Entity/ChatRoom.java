@@ -1,6 +1,8 @@
 package com.chatapp.chatApp.Entity;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -9,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +33,12 @@ public class ChatRoom {
     private String description;
     private String groupImageUrl;
     private String public_id;
+    private LocalDateTime createdAt;
+    private String createdBy;
 
-    private List<ObjectId> admin = new ArrayList<>();
-    private List<ObjectId> member = new ArrayList<>();
+
+    private List<String> admin = new ArrayList<>();
+    private List<String> member = new ArrayList<>();
 
     @DBRef
     private List<Message> chat = new ArrayList<>();
