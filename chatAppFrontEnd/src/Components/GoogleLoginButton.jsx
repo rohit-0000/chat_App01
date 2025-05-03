@@ -7,7 +7,7 @@ const GoogleLoginButton = () => {
 
   const handleLogin = () => {
     const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-    const redirectUri = "http://localhost:8080/auth/google/callback";
+    const redirectUri = `${import.meta.env.VITE_BACKEND_URL}+"/auth/google/callback`;
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     const scope = "openid profile email";
     const responseType = "code";

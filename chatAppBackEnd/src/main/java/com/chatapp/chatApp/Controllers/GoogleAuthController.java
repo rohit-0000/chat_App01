@@ -37,6 +37,10 @@ public class GoogleAuthController {
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
+    @Value("${backend.url}")
+    private String redirect_uri;
+    @Value("${redirect.url.frontend}")
+    private String frontend_redirect_uri;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
@@ -57,7 +61,7 @@ public class GoogleAuthController {
             params.add("code",code);
             params.add("client_id",clientId);
             params.add("client_secret",clientSecret);
-            params.add("redirect_uri","http://localhost:8080/auth/google/callback");
+            params.add("redirect_uri",redirect_uri+"/auth/google/callback");
             params.add("grant_type","authorization_code");
 
             HttpHeaders headers = new HttpHeaders();
@@ -87,7 +91,7 @@ public class GoogleAuthController {
 //                        new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
 //                SecurityContextHolder.getContext().setAuthentication(authentication);
                 String jwtToken=jwtUtils.generateToken(email);
-                String redirectUrl = "http://localhost:5173/oauth2/redirect?token=" + jwtToken;
+                String redirectUrl = frontend_redirect_uri + jwtToken;
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
 
             }

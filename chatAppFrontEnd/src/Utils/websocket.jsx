@@ -3,7 +3,7 @@ import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
 let client = null;
 export const connectToAllRooms = (roomIds, onMessageReceived, onMessageDeleted,onRoomDeleted) => {
-  const socket = new SockJS("http://localhost:8080/chat");
+  const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/chat`);
   
   client = Stomp.over(() => socket);
   

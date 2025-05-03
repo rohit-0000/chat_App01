@@ -14,7 +14,7 @@ export const loginUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:8080/public/login`,
+        `${import.meta.env.VITE_BACKEND_URL}/public/login`,
         user
       );
       return response.data;
@@ -32,7 +32,7 @@ export const sendEmail = createAsyncThunk(
   async (email, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:8080/email/send`,
+        `${import.meta.env.VITE_BACKEND_URL}/email/send`,
         email
       );
       return response.status;
@@ -49,7 +49,7 @@ export const createUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:8080/public/Signup`,
+        `${import.meta.env.VITE_BACKEND_URL}/public/Signup`,
         user
       );
       return response.data;
@@ -67,7 +67,7 @@ export const changePassword = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `http://localhost:8080/public/change-pass`,
+        `${import.meta.env.VITE_BACKEND_URL}/public/change-pass`,
         user
       );
       return response.data;
@@ -84,7 +84,7 @@ export const findUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:8080/public/findUser`,
+        `${import.meta.env.VITE_BACKEND_URL}/public/findUser`,
         formData.userName,
         { headers: { "Content-Type": "text/plain" } }
       );
@@ -106,7 +106,7 @@ export const getUserDetail = createAsyncThunk(
         console.error("Token is missing or invalid");
       }
       const response = await axios.get(
-        "http://localhost:8080/user/fetchUserDetail",
+        `${import.meta.env.VITE_BACKEND_URL}/user/fetchUserDetail`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -133,7 +133,7 @@ export const getRoomMembers = createAsyncThunk(
         console.error("Token is missing or invalid");
       }
       const response = await axios.get(
-        "http://localhost:8080/chatroom/get/roomMembers",
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/get/roomMembers`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -159,7 +159,7 @@ export const setProfileImg = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
-        "http://localhost:8080/user/user-img",
+        `${import.meta.env.VITE_BACKEND_URL}/user/user-img`,
         ImageData,
         {
           headers: {
@@ -186,7 +186,7 @@ export const ChatAi = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
-        "http://localhost:8080/api/qna/ask",
+        `${import.meta.env.VITE_BACKEND_URL}/api/qna/ask`,
         question,
         {
           headers: {
@@ -210,7 +210,7 @@ export const deleteProfileImg = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
-      const response = axios.delete("http://localhost:8080/user/delete-img", {
+      const response = axios.delete(`${import.meta.env.VITE_BACKEND_URL}/user/delete-img`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -230,7 +230,7 @@ export const setGroupImg = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
-        `http://localhost:8080/chatroom/group-img/${groupId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/group-img/${groupId}`,
         ImageData,
         {
           headers: {
@@ -254,7 +254,7 @@ export const deleteGroupImg = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = axios.delete(
-        `http://localhost:8080/chatroom/delete-img/${roomKey}`,
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/delete-img/${roomKey}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -275,7 +275,7 @@ export const updateUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
-      const response = await axios.put("http://localhost:8080/user", user, {
+      const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/user`, user, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -295,7 +295,7 @@ export const updateGroup = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.put(
-        "http://localhost:8080/chatroom/update-room",
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/update-room`,
         chatRoom,
         {
           headers: {
@@ -318,7 +318,7 @@ export const createRoom = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = axios.post(
-        "http://localhost:8080/chatroom/create",
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/create`,
         chatRoom,
         {
           headers: {
@@ -342,7 +342,7 @@ export const joinRoom = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = axios.post(
-        "http://localhost:8080/chatroom/join-group",
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/join-group`,
         roomKey,
         {
           headers: {
@@ -366,7 +366,7 @@ export const leaveGroup = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = axios.post(
-        "http://localhost:8080/chatroom/leave-group",
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/leave-group`,
         roomKey,
         {
           headers: {
@@ -391,7 +391,7 @@ export const deleteGroup = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = axios.delete(
-        `http://localhost:8080/chatroom/delete/${roomKey}`,
+        `${import.meta.env.VITE_BACKEND_URL}/chatroom/delete/${roomKey}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -414,7 +414,7 @@ export const sendMedia = createAsyncThunk(
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
-        `http://localhost:8080/sendMedia/${groupId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/sendMedia/${groupId}`,
         MediaData,
         {
           headers: {
@@ -438,7 +438,7 @@ export const makeAdmin = createAsyncThunk(
   async (body, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
-      await axios.post("http://localhost:8080/chatroom/add-admin", body, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chatroom/add-admin`, body, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -457,7 +457,7 @@ export const removeAdmin = createAsyncThunk(
   async (body, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
-      await axios.post("http://localhost:8080/chatroom/remove-admin", body, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chatroom/remove-admin`, body, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -476,7 +476,7 @@ export const removeMember = createAsyncThunk(
   async (body, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
-      await axios.post("http://localhost:8080/chatroom/remove-Member", body, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chatroom/remove-Member`, body, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -496,7 +496,7 @@ export const deleteChat =createAsyncThunk(
   async(body,{rejectWithValue})=>{
     try {
       const token = localStorage.getItem("chatAppToken");
-      await axios.delete(`http://localhost:8080/chat/delete/${body.id}`, {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/chat/delete/${body.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "text/plain",
