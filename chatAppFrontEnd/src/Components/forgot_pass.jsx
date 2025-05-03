@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { Navigate, useNavigate } from "react-router";
+import { set, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 import { findUser, sendEmail } from "../Reducer/chatSlice";
 import toast from "react-hot-toast";
+import Otp_verify from "./otp_verify"
 
 const forgot_pass = () => {
   const dispatch = useDispatch();
@@ -12,9 +13,11 @@ const forgot_pass = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm();
-  const navigate = useNavigate();
+  const [userFound,setUserFound]=useState(false);
+  const [optVerify,setOtpVerify] = useState(false);
+  const [otpState, setOtpState] = useState(null);
   async function handleforgotpass(formdata) {
-    const result = await dispatch(await findUser(formdata));
+    const result = await dispatch(findUser(formdata));
     if (findUser.fulfilled.match(result)) {
       const generatedOtp =  Math.floor(100000 + Math.random() * 900000).toString();
       const data=result.payload;
@@ -35,12 +38,16 @@ const forgot_pass = () => {
               The EasyChat Team`,
       };
       await dispatch(sendEmail(emailData));
-      navigate("/verify-otp", { state: { data, generatedOtp } });
+      setOtpState({ data, generatedOtp })
+      setOtpVerify(true);
     }else{
       toast.error( "User Not Found");
+      setUserFound(true);
     }
   }
+
   return (
+    optVerify? <Otp_verify state={otpState}/>:
     <form
       onSubmit={handleSubmit(handleforgotpass)}
       className="flex flex-col gap-6  px-5 md:px-15 py-10 rounded inset-shadow-sm  inset-shadow-indigo-400 shadow-sm shadow-indigo-400 w-80 md:w-2xl"
@@ -65,11 +72,16 @@ const forgot_pass = () => {
             {errors.userName.message}
           </p>
         )}
+        {(!errors.userName&&userFound) && (
+          <p className="text-red-500 italic self-start pl-3">
+            User not found
+          </p>
+        )}
       </div>
 
       <input
         type="submit"
-        value={isSubmitting ? "Requestin OTP" : "Request OTP"}
+        value={isSubmitting ? "Requesting OTP" : "Request OTP"}
         className={
           isSubmitting
             ? "bg-green-900 text-2xl py-2 rounded-xl"

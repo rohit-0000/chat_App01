@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import OpenEye from "../assets/open-eye.svg";
 import ClosedEye from "../assets/closed-eye.svg";
-import { Link, Navigate, replace } from "react-router-dom";
+import { Link, Navigate, replace, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { findUser, getUserDetail, loginUser } from "../Reducer/chatSlice";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { NavLink } from "react-router";
+import GoogleLoginButton from "./GoogleLoginButton";
 const login = () => {
   const dispatch = useDispatch();
+  const[forgotPass,setForgotPass] = useState(false);
   const navigate = useNavigate();
   function handleTogglePassword() {
     let pass = document.getElementById("password");
@@ -33,11 +34,12 @@ const login = () => {
   } = useForm();
 
   async function handleLogin(data) {
-    const result = await dispatch(loginUser(data));
+    const result =await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
-      dispatch(getUserDetail());
-      <Navigate to="/home"/>
+      navigate("/home");
       window.location.reload();
+    }else{
+      setForgotPass(true);
     }
   }
 
@@ -96,10 +98,17 @@ const login = () => {
               {errors.password.message}
             </p>
           )}
-          {errors.password && (
-            <Link to="/forgot-password" className="text-blue-300 pt-1.5 ">
+          {
+            forgotPass &&(
+              <p className="text-red-500 italic w-[250px] md:w-[350px] lg:w-[550px]">
+              Incorrect UserName or Password
+            </p>
+            )
+          }
+          {(errors.password ||forgotPass) && (
+            <NavLink to="/forgot-password" className="text-blue-300 pt-1.5 ">
               Forgot password ?
-            </Link>
+            </NavLink>
           )}
         </div>
 
@@ -114,7 +123,7 @@ const login = () => {
           disabled={isSubmitting}
         />
       </form>
-
+      <GoogleLoginButton/>
       <p>
         Don't have an account ?{" "}
         <Link to="/signup" className="text-blue-300 underline">

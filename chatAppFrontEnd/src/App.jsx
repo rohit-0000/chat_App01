@@ -16,9 +16,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { connectToAllRooms } from "./Utils/websocket";
 import { addMessageToGroup, removeMessageFromGroup,removeChatRoom } from "./Reducer/chatSlice";
+import OAuth2RedirectHandler from "./Components/OAuth2RedirectHandler ";
 
 function App() {
-  const token = useSelector((state) => state.chatApp.token);
+  const token = localStorage.getItem("chatAppToken");
   const router = createBrowserRouter([
     {
       path: "/",
@@ -40,6 +41,10 @@ function App() {
         </div>
       ),
     },
+    {
+      path: "/oauth2/redirect",
+      element: <OAuth2RedirectHandler />,
+    },  
     {
       path: "/forgot-password",
       element: (

@@ -4,9 +4,13 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { findUser, sendEmail } from "../Reducer/chatSlice";
 import toast from "react-hot-toast";
+import OtpVerify from "./otp_verify";
+import GoogleLoginButton from "./GoogleLoginButton";
 const signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [signupStart,setSignupStart] = useState(false);
+   const [otpState, setOtpState] = useState(null);
   const {
     register,
     handleSubmit,
@@ -41,10 +45,12 @@ const signup = () => {
         Best regards,
         The EasyChat Team`,
     };
-    dispatch(sendEmail(emailData));
-    navigate("/verify-otp", { state: {data , generatedOtp} });
+    dispatch(sendEmail(emailData))
+      setSignupStart(true);
+      setOtpState({data,generatedOtp});
   }
   return (
+    signupStart?<OtpVerify state={otpState}/>:
     <div className="flex flex-col gap-11 items-center px-5 md:px-15 py-10 rounded inset-shadow-sm  inset-shadow-indigo-400 shadow-sm shadow-indigo-400">
       <h1 className=" text-4xl md:text-5xl font-bold">Signup</h1>
       <form
@@ -103,8 +109,8 @@ const signup = () => {
               },
             })}
           />
-          {errors.username && (
-            <p className="text-red-500 italic ">{errors.username.message}</p>
+          {errors.userName && (
+            <p className="text-red-500 italic ">{errors.userName.message}</p>
           )}
         </div>
 
@@ -119,6 +125,7 @@ const signup = () => {
           disabled={isSubmitting}
         />
       </form>
+      <GoogleLoginButton/>
       <p>
         Already have an account?{" "}
         <Link to="/" className="text-blue-300 underline">

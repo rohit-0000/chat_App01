@@ -46,6 +46,7 @@ const profile = () => {
     register: registerForm3,
     handleSubmit: handleSubmitForm3,
     watch: watchForm3,
+    reset,
     formState: { errors: errorsForm3, isSubmitting: isSubmittingForm3 },
   } = useForm();
 
@@ -116,7 +117,10 @@ const profile = () => {
         toast.error("Error comparing Password");
         console.log(err);
       } else if (result) {
-        dispatch(updateUser(data));
+        dispatch(updateUser(data)).then(()=>{
+          toast.success("Password updated successfully");
+          reset();
+        })
       } else {
         toast.error("Password do not match");
       }

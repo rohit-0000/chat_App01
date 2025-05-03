@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import OpenEye from "../assets/open-eye.svg";
 import ClosedEye from "../assets/closed-eye.svg";
@@ -7,10 +7,10 @@ import { changePassword, createUser, loginUser } from "../Reducer/chatSlice";
 import { Navigate, replace, useLocation, useNavigate } from "react-router";
 const change_password = () => {
   const location = useLocation(); 
-  const user = location.state.user;
+  const user = location.state?.user;
   const dispatch=useDispatch();
   const navigate=useNavigate();
-
+  
   function handleTogglePassword(field) {
     const pass = document.getElementById(`${field}-password`);
     const open = document.getElementById(`${field}-openEye`);
@@ -40,22 +40,23 @@ const change_password = () => {
       const result=await dispatch(createUser(user));
       if (createUser.fulfilled.match(result)) {
         await dispatch(loginUser(user));
+        navigate("/");
+        window.location.reload();
       } else {
         toast.error("Failed to create user. Please try again.");
       }
     }else{
-      user["password"]=data.password;
-      const result=dispatch(changePassword(user));
+      const new_user = { ...user, password: data.password };
+      const result=await dispatch(changePassword(new_user));
       if (changePassword.fulfilled.match(result)) {
-        navigate("/home",{state:{replace:true}});
-        <Navigate to="/home"/>
+        navigate("/");
         window.location.reload();
       }
     }
   }
   return (
     <div className="flex flex-col gap-11 items-center px-5 md:px-15 py-10 rounded inset-shadow-sm  inset-shadow-indigo-400 shadow-sm shadow-indigo-400">
-      <h1 className=" text-4xl md:text-5xl font-bold">Signup</h1>
+      <h1 className=" text-4xl md:text-5xl font-bold">Set Password</h1>
       <form
         className="flex flex-col gap-5 md:gap-10 "
         onSubmit={handleSubmit(handleSetPass)}

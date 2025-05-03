@@ -4,11 +4,10 @@ import { replace, useLocation, useNavigate } from "react-router";
 import { sendEmail } from "../Reducer/chatSlice";
 import toast from "react-hot-toast";
 
-const OtpVerify = () => {
+const OtpVerify = (props) => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
-  const location = useLocation();
-  const recievedState = location.state;
-  const email = recievedState.data.email || "";
+  const recievedState = props.state ;
+  const email = recievedState.data.email ||"" ;
   const [sendOTP, SetSendOTP] = useState(recievedState.generatedOtp);
   const [timer, setTimer] = useState(30);
   const navigate = useNavigate();

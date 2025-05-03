@@ -284,9 +284,8 @@ const Home = () => {
     <div
       className={`overflow-hidden h-screen w-screen ${
         !fullImg && "p-2"
-      } flex gap-1 relative `}
+      } flex gap-1 relative transition-all duration-400 ease-in`}
     >
-      {/* full image */}
 
       <div
         className={`${

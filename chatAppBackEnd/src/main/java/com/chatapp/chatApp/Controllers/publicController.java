@@ -61,8 +61,13 @@ public class publicController {
 
    @PutMapping("/change-pass")
     public ResponseEntity<?> changePassword(@RequestBody User user){
-       User userInDb=userServices.findByEmail(user.getEmail());
-       return userServices.updateUser(user,userInDb);
+       try {
+           User userInDb = userServices.findByEmail(user.getEmail());
+           return userServices.updateUser(user, userInDb);
+       }
+       catch (Exception e){
+           return new ResponseEntity<>(e,HttpStatus.BAD_REQUEST);
+       }
    }
 
    @PostMapping("/findUser")
@@ -77,6 +82,7 @@ public class publicController {
            User temp=new User();
            temp.setName(user.getName());
            temp.setEmail(user.getEmail());
+           temp.setUserName(user.getUserName());
            return new ResponseEntity<>(temp,HttpStatus.OK);
        }
    }

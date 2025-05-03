@@ -66,7 +66,7 @@ export const changePassword = createAsyncThunk(
   "change/password",
   async (user, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
+      const response = await axios.put(
         `http://localhost:8080/public/change-pass`,
         user
       );
@@ -546,7 +546,6 @@ export const chatSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.token = action.payload;
         localStorage.setItem("chatAppToken", action.payload);
-        toast.success("login-sucessful");
       })
       .addCase(loginUser.rejected, (state, action) => {
         toast.error(action.payload || "Login failed. please try again.");
@@ -563,14 +562,14 @@ export const chatSlice = createSlice({
       .addCase(createUser.rejected, (state, action) => {
         toast.error(action.payload || "Error in creating user");
       })
-      .addCase(changePassword.fulfilled, (state, action) => {
-        toast.success("User created sucessfully");
-      })
       .addCase(changePassword.rejected, (state, action) => {
         toast.error(action.payload || "Error in changing password");
       })
       .addCase(findUser.fulfilled, (state, action) => {
         state.user = action.payload;
+      })
+      .addCase(findUser.rejected,()=>{
+        console.log("user not found");
       })
       .addCase(getUserDetail.fulfilled, (state, action) => {
         state.user = action.payload;

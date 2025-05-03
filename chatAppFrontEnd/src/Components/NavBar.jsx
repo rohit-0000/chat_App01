@@ -5,14 +5,14 @@ import logout from "../assets/logout.svg";
 import AiImg from "../assets/aiImg.svg";
 import { NavLink } from "react-router";
 import { getRoomMembers, getUserDetail } from "../Reducer/chatSlice";
-import ChatAppLogo from "../assets/chatAppLogo.png"
+import ChatAppLogo from "../assets/chatAppLogo.png";
 import { useDispatch, useSelector } from "react-redux";
 const NavBar = () => {
   const [isNavBarExpanded, setIsNavBarExpanded] = useState(false);
   const dispatch = useDispatch();
   const navBarRef = useRef(null);
   const user = useSelector((state) => state.chatApp.user);
-  const [loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
   function handleNavBar() {
     setIsNavBarExpanded((prev) => !prev);
   }
@@ -35,23 +35,21 @@ const NavBar = () => {
     };
   }, []);
 
-  // Fetch user details once on mount
   useEffect(() => {
     setLoading(true);
     dispatch(getUserDetail());
-    setLoading(false);
+    // setLoading(false);
   }, []);
 
-  // When user is updated, fetch room members
   useEffect(() => {
     setLoading(true);
     if (user?.group) {
       user.group.forEach((group) => {
-        dispatch(getRoomMembers(group?.roomKey));
-      });
+          dispatch(getRoomMembers(group?.roomKey))
+        });
+      }
       setLoading(false);
-    }
-  }, [user]);
+  }, []);
 
   return (
     <div
@@ -60,7 +58,15 @@ const NavBar = () => {
         isNavBarExpanded ? "w-[200px]" : "w-14"
       } h-screen border-r fixed top-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
     >
-      <div className={`absolute inset-0 flex justify-center items-center bg-slate-950  ${loading?"opacity-100 w-screen h-screen top-0 left-0":"opacity-0 w-0 h-0 overflow-hidden top-1/2 left-[50vw]"} `}><img src={ChatAppLogo} className="p-50 "/></div>
+      <div
+        className={`absolute inset-0 flex justify-center items-center bg-slate-950  ${
+          loading
+            ? "opacity-100 w-screen h-screen top-0 left-0"
+            : "opacity-0 w-0 h-0 overflow-hidden top-1/2 left-[50vw]"
+        } `}
+      >
+        <img src={ChatAppLogo} className="p-50 " />
+      </div>
       {/* Upper Nav */}
       <div className="flex flex-col gap-5 w-full ">
         {/* NavButton */}
@@ -84,7 +90,16 @@ const NavBar = () => {
           }
         >
           <img src={ChatImg} className="  max-w-10 max-h-10 " />
-          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> Chats </div>
+          <div
+            className={`text-xl ${
+              isNavBarExpanded
+                ? "opacity-100 w-fit block"
+                : "opacity-0 w-0 absolute"
+            } transition-all duration-100 ease-linear`}
+          >
+            {" "}
+            Chats{" "}
+          </div>
         </NavLink>
         {/* jm */}
         <NavLink
@@ -98,7 +113,16 @@ const NavBar = () => {
           }
         >
           <img src={AiImg} className="  max-w-11 max-h-11 " />
-          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> AI </div>
+          <div
+            className={`text-xl ${
+              isNavBarExpanded
+                ? "opacity-100 w-fit block"
+                : "opacity-0 w-0 absolute"
+            } transition-all duration-100 ease-linear`}
+          >
+            {" "}
+            AI{" "}
+          </div>
         </NavLink>
       </div>
 
@@ -119,7 +143,16 @@ const NavBar = () => {
             src={user?.userImageUrl || defaultUserImg}
             className=" w-10 h-10 object-cover rounded-full p-0.5 aspect-[1/1]"
           />
-          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`}> Profile </div>
+          <div
+            className={`text-xl ${
+              isNavBarExpanded
+                ? "opacity-100 w-fit block"
+                : "opacity-0 w-0 absolute"
+            } transition-all duration-100 ease-linear`}
+          >
+            {" "}
+            Profile{" "}
+          </div>
         </NavLink>
         {/* Logout */}
         <div
@@ -128,7 +161,17 @@ const NavBar = () => {
           } `}
         >
           <img src={logout} className=" max-w-10 max-h-10 p-1 ml-1" />
-          <div className={`text-xl ${isNavBarExpanded?"opacity-100 w-fit block":"opacity-0 w-0 absolute"} transition-all duration-100 ease-linear`} onClick={HandleLogOut}> Logout </div>
+          <div
+            className={`text-xl ${
+              isNavBarExpanded
+                ? "opacity-100 w-fit block"
+                : "opacity-0 w-0 absolute"
+            } transition-all duration-100 ease-linear`}
+            onClick={HandleLogOut}
+          >
+            {" "}
+            Logout{" "}
+          </div>
         </div>
       </div>
     </div>
