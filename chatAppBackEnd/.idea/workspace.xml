@@ -5,28 +5,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e3b5437-60d8-4ca4-b212-9b467291d7e0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Controllers/GoogleAuthController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/ChatAppApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/ChatAppApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Controllers/publicController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Controllers/publicController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Services/UserServices.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Services/UserServices.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Config/Cors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Config/Cors.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Controllers/GoogleAuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Controllers/GoogleAuthController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/ChatAppApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/ChatAppApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Config/Cors.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Config/Cors.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/AIController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/AIController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/ChatController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/ChatController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/ChatRoomController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/ChatRoomController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/UserController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/publicController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Controllers/publicController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/ChatRoom$ChatRoomBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/ChatRoom$ChatRoomBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/ChatRoom.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/ChatRoom.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/Message$MessageBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/Message$MessageBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/Message.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/Message.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/User$UserBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Entity/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Repository/MessageRepo.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Repository/MessageRepo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/AIService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/AIService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/ChatRoomService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/ChatRoomService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/ImageService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/ImageService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/UserDetailServiceImp.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/UserDetailServiceImp.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/UserServices.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/chatapp/chatApp/Services/UserServices.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/Loading .jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/change_password.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/change_password.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/forgot_pass.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/forgot_pass.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/home.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/otp_verify.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/otp_verify.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/profile.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/signup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/signup.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Reducer/chatSlice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Reducer/chatSlice.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

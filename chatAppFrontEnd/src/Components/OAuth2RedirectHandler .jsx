@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const OAuth2RedirectHandler = () => {
   const navigate = useNavigate();
 

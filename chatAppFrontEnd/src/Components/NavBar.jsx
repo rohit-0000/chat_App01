@@ -159,6 +159,7 @@ const NavBar = () => {
           className={`flex justify-center gap-2 items-center cursor-pointer hover:bg-red-500 rounded  active:scale-95   ${
             isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
           } `}
+          onClick={HandleLogOut}
         >
           <img src={logout} className=" max-w-10 max-h-10 p-1 ml-1" />
           <div
@@ -167,10 +168,9 @@ const NavBar = () => {
                 ? "opacity-100 w-fit block"
                 : "opacity-0 w-0 absolute"
             } transition-all duration-100 ease-linear`}
-            onClick={HandleLogOut}
           >
             {" "}
-            Logout{" "}
+            Logout
           </div>
         </div>
       </div>

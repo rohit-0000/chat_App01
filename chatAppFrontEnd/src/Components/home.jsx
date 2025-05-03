@@ -472,11 +472,11 @@ const Home = () => {
                 )}
                 <div
                   className="w-full flex items-center gap-3 px-5 justify-between"
-                  onClick={() => {
-                    setOpenGroupInfo(!OpenGroupInfo);
-                  }}
+                  
                 >
-                  <div className="flex gap-3 items-center">
+                  <div className="flex gap-3 items-center w-full" onClick={() => {
+                    setOpenGroupInfo(!OpenGroupInfo);
+                  }}>
                     <img
                       src={
                         user?.group?.find((group) => group?.roomKey === groupNo)
@@ -491,17 +491,18 @@ const Home = () => {
                       }
                     </p>
                   </div>
-                  <div className="flex  border border-gray-500 rounded-xl px-2 py-1">
-                    <button className="border-r border-gray-500 pr-1.5 cursor-pointer">
+                  {/* <div className="flex border border-gray-500 rounded-xl px-2 py-1">
+                    <button className="border-r border-gray-500 pr-1.5 cursor-pointer" onClick={(e)=>{e.preventDefault()}}>
                       <img
                         src={videoCall}
-                        className="w-10 mr-1.5 cursor-pointer"
+                        className="w-10 mr-1.5 cursor-pointer active:scale-90"
+                        
                       />
                     </button>
-                    <button className=" pl-1.5 cursor-pointer border-l border-gray-500">
+                    <button className=" pl-1.5 cursor-pointer border-l border-gray-500 active:scale-90" onClick={(e)=>{e.preventDefault()}}>
                       <img src={audioCall} className="w-9" />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
