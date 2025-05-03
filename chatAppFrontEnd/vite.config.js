@@ -1,14 +1,8 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  base: '/',
-  build: {
-    outDir: 'dist',
-  },
-  define: {
-    global: {}, // Fix "global is not defined" error
-  },
+  plugins: [tailwindcss(), react()],
+  define: { global: "globalThis" },
 });
