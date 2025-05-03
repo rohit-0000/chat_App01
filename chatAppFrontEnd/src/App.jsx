@@ -81,7 +81,6 @@ function App() {
       ) : (
         <Navigate to={"/"} />
       ),
-      // element: <Home/> ,
     },
     {
       path: "/profile",
@@ -135,6 +134,7 @@ function App() {
   }, [roomIds]);
 
   return (
+    
     <div className="text-white">
       <RouterProvider router={router} />
       {/* <Otp_verify/> */}

@@ -5,14 +5,12 @@ import logout from "../assets/logout.svg";
 import AiImg from "../assets/aiImg.svg";
 import { NavLink } from "react-router";
 import { getRoomMembers, getUserDetail } from "../Reducer/chatSlice";
-import ChatAppLogo from "../assets/chatAppLogo.png";
 import { useDispatch, useSelector } from "react-redux";
 const NavBar = () => {
   const [isNavBarExpanded, setIsNavBarExpanded] = useState(false);
   const dispatch = useDispatch();
   const navBarRef = useRef(null);
   const user = useSelector((state) => state.chatApp.user);
-  const [loading, setLoading] = useState(false);
   function handleNavBar() {
     setIsNavBarExpanded((prev) => !prev);
   }
@@ -36,19 +34,15 @@ const NavBar = () => {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     dispatch(getUserDetail());
-    // setLoading(false);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     if (user?.group) {
       user.group.forEach((group) => {
           dispatch(getRoomMembers(group?.roomKey))
         });
       }
-      setLoading(false);
   }, [user]);
 
   return (
@@ -58,15 +52,6 @@ const NavBar = () => {
         isNavBarExpanded ? "w-[200px]" : "w-14"
       } h-screen border-r fixed top-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
     >
-      <div
-        className={`absolute inset-0 flex justify-center items-center bg-slate-950  ${
-          loading
-            ? "opacity-100 w-screen h-screen top-0 left-0"
-            : "opacity-0 w-0 h-0 overflow-hidden top-1/2 left-[50vw]"
-        } `}
-      >
-        <img src={ChatAppLogo} className="p-50 " />
-      </div>
       {/* Upper Nav */}
       <div className="flex flex-col gap-5 w-full ">
         {/* NavButton */}

@@ -314,7 +314,7 @@ const Home = () => {
           ref={leftBoxRef}
           className={`h-full  relative rounded-l-2xl bg-[#fff1d53a] ${
             groupNo !== null && "hidden md:flex"
-          } flex flex-col justify-center gap-2 min-w-80 `}
+          } flex flex-col justify-center gap-2 md:min-w-80 `}
           style={
             !isSmallScreen ? { width: `${sizes.left}vw` } : { width: "100%" }
           }
@@ -447,7 +447,7 @@ const Home = () => {
         {/* rightBox */}
         <div
           ref={rightBoxRef}
-          className={`h-full  md:block  border-dotted rounded-l-2xl md:rounded-l-none rounded-r-2xl bg-[#ffffff2a] relative min-w-80 md:min-w-100 ${
+          className={`h-full  md:block  border-dotted rounded-l-2xl md:rounded-l-none rounded-r-2xl bg-[#ffffff2a] relative  md:min-w-100 ${
             groupNo === null ? "hidden" : ""
           } `}
           style={
