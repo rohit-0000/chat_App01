@@ -49,7 +49,7 @@ const NavBar = () => {
         });
       }
       setLoading(false);
-  }, []);
+  }, [user]);
 
   return (
     <div
