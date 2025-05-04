@@ -15,7 +15,11 @@ import NavBar from "./Components/NavBar";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { connectToAllRooms } from "./Utils/websocket";
-import { addMessageToGroup, removeMessageFromGroup,removeChatRoom } from "./Reducer/chatSlice";
+import {
+  addMessageToGroup,
+  removeMessageFromGroup,
+  removeChatRoom,
+} from "./Reducer/chatSlice";
 import OAuth2RedirectHandler from "./Components/OAuth2RedirectHandler ";
 
 function App() {
@@ -44,7 +48,7 @@ function App() {
     {
       path: "/oauth2/redirect",
       element: <OAuth2RedirectHandler />,
-    },  
+    },
     {
       path: "/forgot-password",
       element: (
@@ -109,21 +113,25 @@ function App() {
   const roomIds = useSelector((state) =>
     state.chatApp.user?.group?.map((g) => g?.roomKey)
   );
+  const user = useSelector((state)=>state.chatApp.user)
 
   useEffect(() => {
     if (roomIds == null || roomIds === "") return;
     const client = connectToAllRooms(
       roomIds,
       (roomId, message) => {
-        dispatch(addMessageToGroup({ roomId, message }));
+        if (message.senderId !== user.id || message.public_Id!==null) {
+          dispatch(addMessageToGroup({ roomId, message }));
+        }
       },
-      (roomId, deletedMessageId) => { // Pass the onMessageDeleted function
+      (roomId, deletedMessageId) => {
+        // Pass the onMessageDeleted function
         dispatch(
-          removeMessageFromGroup({ roomKey:roomId, id: deletedMessageId })
+          removeMessageFromGroup({ roomKey: roomId, id: deletedMessageId })
         );
       },
-      (roomKey)=>{
-        dispatch(removeChatRoom(roomKey))
+      (roomKey) => {
+        dispatch(removeChatRoom(roomKey));
       }
     );
     return () => {
@@ -134,7 +142,6 @@ function App() {
   }, [roomIds]);
 
   return (
-    
     <div className="text-white">
       <RouterProvider router={router} />
       {/* <Otp_verify/> */}

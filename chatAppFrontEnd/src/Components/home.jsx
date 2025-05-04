@@ -15,10 +15,11 @@ import JoinGroup from "./joinGroup";
 import GroupInfo from "./groupInfo";
 import { sendMessage } from "../Utils/websocket";
 import AddImg from "../assets/addImg.svg";
-import { deleteChat, sendMedia } from "../Reducer/chatSlice";
+import { addMessageToGroup, deleteChat, sendMedia } from "../Reducer/chatSlice";
 import downloadImg from "../assets/downloadImg.svg";
 import fileImg from "../assets/fileImg.svg";
 import DeleteImg from "../assets/deleteImg.svg";
+import ObjectID from "bson-objectid";
 
 const Home = () => {
   const leftBoxRef = useRef(null);
@@ -111,12 +112,14 @@ const Home = () => {
       );
     } else {
       const msg = {
+        id: new ObjectID(),
         senderId: user.id,
         message: message,
         time: new Date().toISOString(),
         senderName: user.name,
         senderImg: user.userImageUrl,
       };
+      dispatch(addMessageToGroup({ roomId: groupNo, message: msg }));
       sendMessage(groupNo, msg);
       setMessage("");
       textareaRef.current.style.height = "auto";
@@ -176,11 +179,11 @@ const Home = () => {
     if (!preview) return null;
 
     if (fileType.startsWith("image/")) {
-      return <img src={preview} alt="preview" style={{ maxWidth: "300px" }} />;
+      return <img src={preview} alt="preview" className="w-[200px] md:max-w-350px" />;
     } else if (fileType.startsWith("audio/")) {
       return <audio controls src={preview} />;
     } else if (fileType.startsWith("video/")) {
-      return <video controls src={preview} style={{ maxWidth: "300px" }} />;
+      return <video controls src={preview} className="max-w-[250px] md:max-w-350px"/>;
     } else if (fileType === "application/pdf") {
       return (
         <iframe src={preview} width="300" height="400" title="PDF Preview" />
@@ -542,9 +545,11 @@ const Home = () => {
                           : "self-start"
                       } w-fit text-white flex gap-5 `}
                       onMouseEnter={() => {
+                        console.log("Mouse entered:", m.id);
                         setToDeleteChat(m.id);
                       }}
                       onMouseLeave={() => {
+                        console.log("Mouse left:", m.id);
                         setToDeleteChat(null);
                       }}
                     >
@@ -596,6 +601,7 @@ const Home = () => {
                                 dispatch(deleteChat(body));
                               }}
                             />
+                            
                           )}
                       </div>
                     </div>
@@ -636,7 +642,6 @@ const Home = () => {
                       <div className="absolute h-full w-full flex justify-center items-center">
                         <div
                           className="w-10 h-10 border-5 border-transparent animate-spin  border-t-red-400 rounded-full"
-                          div
                         />
                       </div>
                     )}

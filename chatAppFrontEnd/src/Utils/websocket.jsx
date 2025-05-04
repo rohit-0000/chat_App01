@@ -12,7 +12,6 @@ export const connectToAllRooms = (roomIds, onMessageReceived, onMessageDeleted,o
     roomIds.forEach((roomId) => {
       client.subscribe(`/topic/room/${roomId}`, (message) => {
         onMessageReceived(roomId, JSON.parse(message.body));
-        console.log(message);
       });
 
       client.subscribe(`/topic/room/${roomId}/delete`, (message) => {
