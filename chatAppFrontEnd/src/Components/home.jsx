@@ -280,16 +280,34 @@ const Home = () => {
               src={downloadImg}
               className="w-6 absolute right-2 -top-7 active:scale-90 cursor-pointer"
               onClick={async () => {
-                const blob = await (await fetch(url)).blob();
-                const link = Object.assign(document.createElement("a"), {
-                  href: URL.createObjectURL(blob),
-                  download: "download",
-                });
-                link.click();
+                try {
+                  const response = await fetch(url, { mode: "cors" }); // Ensure CORS mode is enabled
+                  if (!response.ok) {
+                    throw new Error("Failed to fetch the file");
+                  }
+                  const blob = await response.blob();
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = "download.pdf"; // Set the desired file name
+                  link.click();
+                } catch (error) {
+                  console.error("Error downloading the file:", error);
+                }
               }}
               alt="Download"
             />
-            <iframe src={url} className="w-55 md:w-75 h-90 cursor-pointer" />
+            <iframe
+              src={url}
+              className="w-55 md:w-75 h-90 cursor-pointer"
+              style={{
+                border: "none",
+              }}
+              onError={() => {
+                console.error(
+                  "Failed to load the PDF. Check the URL or CORS settings."
+                );
+              }}
+            />
             <a href={url} className="border px-2 py-1 rounded-xl bg-blue-600">
               Open Pdf
             </a>
