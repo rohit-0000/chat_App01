@@ -226,16 +226,15 @@ const Home = () => {
     if (!selectedFile) return;
 
     const url = URL.createObjectURL(selectedFile);
+    let secureUrl = url.startsWith("http://") ? url.replace("http://", "https://") : url;
     setFileType(selectedFile.type);
-    setPreview(url);
+    setPreview(secureUrl);
     setFile(selectedFile);
   };
 
-  function getFileType(url) {
-    let secureUrl = url.startsWith("http://")
-      ? url.replace("http://", "https://")
-      : url;
-    const extension = secureUrl.split(".").pop().split("?")[0].toLowerCase();
+  function getFileType(unSecureUrl) {
+    let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
+    const extension = url.split(".").pop().split("?")[0].toLowerCase();
     if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension))
       return "image";
     if (["mp4", "webm", "ogg"].includes(extension)) return "video";
@@ -243,8 +242,9 @@ const Home = () => {
     if (["pdf"].includes(extension)) return "pdf";
     return "unknown";
   }
-  function showMediaChat(url) {
+  function showMediaChat(unSecureUrl) {
     {
+      let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
       const type = getFileType(url);
       if (type === "image")
         return (
@@ -307,7 +307,8 @@ const Home = () => {
       );
     }
   }
-  function showMediaChatPreview(url) {
+  function showMediaChatPreview(unSecureUrl) {
+    let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
     const type = getFileType(url);
     if (type === "image") {
       return (
