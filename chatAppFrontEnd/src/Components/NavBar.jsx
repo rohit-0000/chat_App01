@@ -33,17 +33,17 @@ const NavBar = () => {
     };
   }, []);
 
-  useEffect(() => {
-    dispatch(getUserDetail());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getUserDetail());
+  // }, []);
 
-  useEffect(() => {
-    if (user?.group) {
-      user.group.forEach((group) => {
-          dispatch(getRoomMembers(group?.roomKey))
-        });
-      }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user?.group) {
+  //     user.group.forEach((group) => {
+  //         dispatch(getRoomMembers(group?.roomKey))
+  //       });
+  //     }
+  // }, [user]);
 
   return (
     <div

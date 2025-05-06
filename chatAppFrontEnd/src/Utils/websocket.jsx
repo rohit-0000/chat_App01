@@ -3,6 +3,11 @@ import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
 let client = null;
 export const connectToAllRooms = (roomIds, onMessageReceived, onMessageDeleted,onRoomDeleted) => {
+
+  if (!roomIds || roomIds.length === 0) {
+    console.warn("No room IDs provided for subscription.");
+    return null;
+  }
   const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/chat`);
   
   client = Stomp.over(() => socket);

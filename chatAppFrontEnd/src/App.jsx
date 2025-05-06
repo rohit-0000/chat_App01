@@ -13,17 +13,22 @@ import Profile from "./Components/profile";
 import AI from "./Components/ai";
 import NavBar from "./Components/NavBar";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { connectToAllRooms } from "./Utils/websocket";
+import LoadingImg from "./assets/chatAppLogo.png";
+
 import {
   addMessageToGroup,
   removeMessageFromGroup,
   removeChatRoom,
+  getUserDetail,
+  getRoomMembers,
 } from "./Reducer/chatSlice";
 import OAuth2RedirectHandler from "./Components/OAuth2RedirectHandler ";
 
 function App() {
   const token = localStorage.getItem("chatAppToken");
+  const [loading, setLoading] = useState(false);
   const router = createBrowserRouter([
     {
       path: "/",
@@ -113,14 +118,14 @@ function App() {
   const roomIds = useSelector((state) =>
     state.chatApp.user?.group?.map((g) => g?.roomKey)
   );
-  const user = useSelector((state)=>state.chatApp.user)
+  const user = useSelector((state) => state.chatApp.user);
 
   useEffect(() => {
     if (roomIds == null || roomIds === "") return;
     const client = connectToAllRooms(
       roomIds,
       (roomId, message) => {
-        if (message.senderId !== user.id || message.public_Id!==null) {
+        if (message.senderId !== user.id || message.public_Id !== null) {
           dispatch(addMessageToGroup({ roomId, message }));
         }
       },
@@ -140,11 +145,28 @@ function App() {
       }
     };
   }, [roomIds]);
+  useEffect(() => {
+    if (token) {
+      setLoading(true);
+      dispatch(getUserDetail());
+    }
+  }, [token]);
 
-  return (
+  useEffect(() => {
+    if (user?.group) {
+      user.group.forEach((group) => {
+        dispatch(getRoomMembers(group?.roomKey));
+        setLoading(false);
+      });
+    }
+  }, [user]);
+  return loading && token != null ? (
+    <div className="text-white">
+      <img src={LoadingImg} className="w-100 md:w-200" />
+    </div>
+  ) : (
     <div className="text-white">
       <RouterProvider router={router} />
-      {/* <Otp_verify/> */}
     </div>
   );
 }

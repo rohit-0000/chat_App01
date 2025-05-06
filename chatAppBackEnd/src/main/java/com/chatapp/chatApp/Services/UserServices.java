@@ -39,7 +39,7 @@ public class UserServices {
            if(updatedUser!=null) return new ResponseEntity<>("user already exist with this userName", HttpStatus.BAD_REQUEST);
            oldUser.setUserName(newUser.getUserName());
        }
-       if(!newUser.getPassword().isEmpty()){
+       if(newUser.getUserName()!=null&&!newUser.getPassword().isEmpty()){
            oldUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
        }
        if(newUser.getName()!=null && !newUser.getName().isEmpty() && !newUser.getName().equals(oldUser.getName())) {
