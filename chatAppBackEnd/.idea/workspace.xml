@@ -5,14 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e3b5437-60d8-4ca4-b212-9b467291d7e0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Config/WebsocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Config/WebsocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Entity/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Entity/Message.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Services/UserServices.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chatapp/chatApp/Services/UserServices.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Components/home.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chatAppFrontEnd/src/Utils/websocket.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../chatAppFrontEnd/src/Utils/websocket.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
