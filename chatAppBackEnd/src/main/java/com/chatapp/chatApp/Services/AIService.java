@@ -33,7 +33,7 @@ public class AIService {
     public Map<ObjectId, List<String>> getAnswere(String question, User user){
 
         //        Construct Request as gemini accept in particular manner
-        Map<String , Object> requestBody=Map.of("contents",new Object[]{Map.of("parts",new Object[]{Map.of("text",question + " give in short")})});
+        Map<String , Object> requestBody=Map.of("contents",new Object[]{Map.of("parts",new Object[]{Map.of("text",question )})});
 
         //        API call
         String response =webClient.post()

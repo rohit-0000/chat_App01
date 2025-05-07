@@ -50,8 +50,8 @@ public class ChatController {
         return message;
     }
 
-    @PostMapping("/sendMedia/{groupId}")
-    public ResponseEntity<?> uploadImg(@RequestParam("chatFile") MultipartFile chatFile,@PathVariable String groupId ){
+    @PostMapping("/sendChatMedia/{groupId}")
+    public ResponseEntity<?> uploadChatFile(@RequestParam("chatFile") MultipartFile chatFile,@PathVariable String groupId ){
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user=userServices.findByUsername(userName);
@@ -59,17 +59,7 @@ public class ChatController {
         try{
             List<String> fileID =imageService.uploadFile(chatFile);
             if (fileID.isEmpty()) return new ResponseEntity<>("UnAuthorized to change group image",HttpStatus.BAD_REQUEST);
-           Message message=Message.builder()
-                   .senderId(user.getId())
-                   .message(fileID.get(0))
-                   .time(LocalDateTime.now())
-                   .senderName(user.getName())
-                   .senderImg(user.getUserImageUrl())
-                   .public_Id(fileID.get(1))
-                   .build();
-            simpMessagingTemplate.convertAndSend("/topic/room/"+groupId,message);
-            chatRoomService.sendMessage(groupId, message);
-           return new ResponseEntity<>(message,HttpStatus.OK);
+            return new ResponseEntity<>(fileID,HttpStatus.OK);
         }
         catch(IOException e){
             return new ResponseEntity<>("Failed to send file",HttpStatus.INTERNAL_SERVER_ERROR);

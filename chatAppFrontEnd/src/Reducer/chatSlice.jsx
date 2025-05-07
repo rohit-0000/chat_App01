@@ -408,13 +408,14 @@ export const deleteGroup = createAsyncThunk(
   }
 );
 
-export const sendMedia = createAsyncThunk(
-  "send/media",
+
+export const sendChatMedia = createAsyncThunk(
+  "send/chatmedia",
   async ({ MediaData, groupId }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/sendMedia/${groupId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/sendChatMedia/${groupId}`,
         MediaData,
         {
           headers: {
@@ -659,11 +660,6 @@ export const chatSlice = createSlice({
       })
       .addCase(getRoomMembers.fulfilled, (state, action) => {
         state.friends = { ...state.friends, ...action.payload };
-      })
-      .addCase(sendMedia.fulfilled, () => {
-      })
-      .addCase(sendMedia.rejected, () => {
-        toast.error("nhi hua send");
       })
       .addCase(makeAdmin.fulfilled, (state, action) => {
         const room = state.user.group.find(

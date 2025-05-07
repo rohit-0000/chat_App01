@@ -67,18 +67,20 @@ const ai = () => {
 
         {/* Message Input */}
         <div className="w-full h-fit md:mb-5 flex justify-center">
-          {/* <label className="w-full flex justify-center">
-            <input type="file" className="hidden" /> */}
             <div className="w-full md:w-[80%] bg-neutral-700 md:rounded-2xl flex items-center ">
-              {/* <img src={AddImg} className="h-12 p-1" /> */}
               <textarea
                 type="text"
-                className="w-full outline-0 my-2 px-2 pl-5 text-2xl resize-none h-auto max-h-50"
+                className="w-full outline-0 my-2 px-2 pl-5 text-xl resize-none h-auto max-h-50"
                 placeholder="Type a message"
                 value={question}
                 onChange={(e) => {
                   setQuestion(e.target.value);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend(e); 
+                  }}}
                 onInput={(e) => {
                   e.target.style.height = `auto`;
                   e.target.style.height = `${e.target.scrollHeight}px`;

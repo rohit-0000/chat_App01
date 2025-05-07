@@ -15,7 +15,12 @@ import JoinGroup from "./joinGroup";
 import GroupInfo from "./groupInfo";
 import { sendMessage } from "../Utils/websocket";
 import AddImg from "../assets/addImg.svg";
-import { addMessageToGroup, deleteChat, sendMedia } from "../Reducer/chatSlice";
+import {
+  addMessageToGroup,
+  deleteChat,
+  removeMessageFromGroup,
+  sendChatMedia,
+} from "../Reducer/chatSlice";
 import downloadImg from "../assets/downloadImg.svg";
 import fileImg from "../assets/fileImg.svg";
 import DeleteImg from "../assets/deleteImg.svg";
@@ -53,7 +58,7 @@ const Home = () => {
   const [fileType, setFileType] = useState("");
   const [file, setFile] = useState(null);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState([]);
   const [toDeleteChat, setToDeleteChat] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -103,28 +108,54 @@ const Home = () => {
       right: newRightWidth,
     });
   };
+
+  // message send
   function handleSendMessage() {
     if (message === "" && file === null) return;
     if (file !== null) {
-      setLoading(true);
+      const msg = {
+        id: new ObjectID().toHexString(),
+        senderId: user.id,
+        senderName: user.name,
+        senderImg: user.userImageUrl,
+        message: preview,
+        public_Id: "public_ID",
+        time: new Date().toISOString(),
+        msgType: fileType,
+        fileName: file.name,
+      };
+      setLoading((load) => [...load, msg.id]);
+      dispatch(addMessageToGroup({ roomId: groupNo, message: msg }));
       const formData = new FormData();
       formData.append("chatFile", file);
-      dispatch(sendMedia({ MediaData: formData, groupId: groupNo })).then(
-        () => {
-          setFile(null);
-          setFileType(null);
-          setPreview(null);
-          setLoading(false);
-        }
-      );
+
+      setFile(null);
+      setFileType(null);
+      setPreview(null);
+      fileInputRef.current.value = "";
+
+      dispatch(sendChatMedia({ MediaData: formData, groupId: groupNo }))
+        .unwrap()
+        .then((response) => {
+          const [newMessage, public_ID] = response;
+          console.log("Backend response:", response);
+          const updatedMsg = {
+            ...msg,
+            message: newMessage,
+            public_Id: public_ID,
+          };
+          sendMessage(groupNo, updatedMsg);
+          setLoading((load) => load.filter((id) => id != updatedMsg.id));
+        });
     } else {
       const msg = {
-        id: new ObjectID(),
+        id: new ObjectID().toHexString(),
         senderId: user.id,
         message: message,
         time: new Date().toISOString(),
         senderName: user.name,
         senderImg: user.userImageUrl,
+        msgType: "text",
       };
       dispatch(addMessageToGroup({ roomId: groupNo, message: msg }));
       sendMessage(groupNo, msg);
@@ -132,6 +163,8 @@ const Home = () => {
       textareaRef.current.style.height = "auto";
     }
   }
+
+  //handle click outside
   useEffect(() => {
     const handleClickOutside_CreateRoom = (event) => {
       if (
@@ -182,16 +215,17 @@ const Home = () => {
     };
   }, [roomCreateForm, roomJoinForm, addGroup, OpenGroupInfo]);
 
+  // render Preview
   const renderPreview = () => {
     if (!preview) return null;
 
-    if (fileType.startsWith("image/")) {
+    if (fileType === "image") {
       return (
-        <img src={preview} alt="preview" className="w-[200px] md:max-w-350px" />
+        <img src={preview} alt="preview" className="w-[200px] md:w-[350px]" />
       );
-    } else if (fileType.startsWith("audio/")) {
+    } else if (fileType === "audio") {
       return <audio controls src={preview} />;
-    } else if (fileType.startsWith("video/")) {
+    } else if (fileType === "video") {
       return (
         <video
           controls
@@ -199,7 +233,7 @@ const Home = () => {
           className="w-[100px] md:w-[250px] md:max-w-350px"
         />
       );
-    } else if (fileType === "application/pdf") {
+    } else if (fileType === "pdf") {
       return (
         <div className="w-62 md:w-70 ">
           <iframe
@@ -209,43 +243,49 @@ const Home = () => {
           />
         </div>
       );
-    } else if (
-      file.name.endsWith(".doc") ||
-      file.name.endsWith(".docx") ||
-      file.name.endsWith(".ppt") ||
-      file.name.endsWith(".pptx")
-    ) {
+    } else if (fileType === "doc") {
       return <p className="bg-blue-400 rounded-2xl p-5">{file.name}</p>;
     } else {
       return <p>Unsupported file type</p>;
     }
   };
 
+  // handle File Change
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
-
+    console.log(selectedFile);
     const url = URL.createObjectURL(selectedFile);
-    let secureUrl = url.startsWith("http://") ? url.replace("http://", "https://") : url;
-    setFileType(selectedFile.type);
-    setPreview(secureUrl);
+    let secureUrl = url.startsWith("http://")
+      ? url.replace("http://", "https://")
+      : url;
+
     setFile(selectedFile);
+    setPreview(secureUrl);
+    setFileType(getFileType(selectedFile));
   };
 
-  function getFileType(unSecureUrl) {
-    let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
-    const extension = url.split(".").pop().split("?")[0].toLowerCase();
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension))
-      return "image";
-    if (["mp4", "webm", "ogg"].includes(extension)) return "video";
-    if (["mp3", "wav", "aac"].includes(extension)) return "audio";
-    if (["pdf"].includes(extension)) return "pdf";
-    return "unknown";
+  // get File Type
+  function getFileType(fileType) {
+    if (fileType.type.startsWith("image/")) return "image";
+    else if (fileType.type.startsWith("video/")) return "video";
+    else if (fileType.type.startsWith("audio/")) return "audio";
+    else if (fileType.type === "application/pdf") return "pdf";
+    else if (
+      fileType.name.toLowerCase().endsWith(".doc") ||
+      fileType.name.toLowerCase().endsWith(".docx") ||
+      fileType.name.toLowerCase().endsWith(".ppt") ||
+      fileType.name.toLowerCase().endsWith(".pptx")
+    )
+      return "doc";
+    else return "unknown";
   }
-  function showMediaChat(unSecureUrl) {
+
+  function showMediaChat(unSecureUrl, type, name) {
     {
-      let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
-      const type = getFileType(url);
+      let url = unSecureUrl.startsWith("http://")
+        ? unSecureUrl.replace("http://", "https://")
+        : unSecureUrl;
       if (type === "image")
         return (
           <div className="relative">
@@ -256,7 +296,7 @@ const Home = () => {
                 const blob = await (await fetch(url)).blob();
                 const link = Object.assign(document.createElement("a"), {
                   href: URL.createObjectURL(blob),
-                  download: "download",
+                  download: name,
                 });
                 link.click();
               }}
@@ -270,13 +310,45 @@ const Home = () => {
             </a>
           </div>
         );
-      if (type === "video")
+      else if (type === "video")
         return (
-          <video src={url} controls className="w-50 md:w-80 rounded-2xl" />
+          <div>
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-5 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: name,
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+            <video src={url} controls className="w-50 md:w-80 rounded-2xl" />
+          </div>
         );
-      if (type === "audio")
-        return <audio src={url} controls className="w-60 md:w-80 " />;
-      if (type === "pdf") {
+      else if (type === "audio")
+        return (
+          <div>
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-5 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: name,
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+            <audio src={url} controls className="w-60 md:w-80 " />
+          </div>
+        );
+      else if (type === "pdf") {
         return (
           <div className="relative">
             <img
@@ -286,7 +358,7 @@ const Home = () => {
                 const blob = await (await fetch(url)).blob();
                 const link = Object.assign(document.createElement("a"), {
                   href: URL.createObjectURL(blob),
-                  download: "download",
+                  download: name,
                 });
                 link.click();
               }}
@@ -298,18 +370,56 @@ const Home = () => {
             </a>
           </div>
         );
-      }
-      // for unknown type
-      return (
-        <a href={url}>
-          <img src={fileImg} className="w-50" />
-        </a>
-      );
+      } else if (type === "doc")
+        return (
+          <div>
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-5 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: name,
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+          <a
+            download={name}
+            href={url}
+            className="bg-blue-400 rounded-2xl p-4 block"
+          >
+            <p>{name}</p>
+          </a></div>
+        );
+      else
+        return (
+          <div>
+            <img
+              src={downloadImg}
+              className="w-6 absolute right-2 -top-5 active:scale-90 cursor-pointer"
+              onClick={async () => {
+                const blob = await (await fetch(url)).blob();
+                const link = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: name,
+                });
+                link.click();
+              }}
+              alt="Download"
+            />
+            <a download={name} href={url}>
+              <img src={fileImg} className="w-45" />
+            </a>
+            <p>{name}</p>
+          </div>
+        );
     }
   }
-  function showMediaChatPreview(unSecureUrl) {
-    let url = unSecureUrl.startsWith("http://") ? unSecureUrl.replace("http://", "https://") : unSecureUrl;
-    const type = getFileType(url);
+
+  function showMediaChatPreview(type) {
     if (type === "image") {
       return (
         <div className="flex gap-1">
@@ -346,6 +456,33 @@ const Home = () => {
         </div>
       );
     }
+  }
+
+  //Time conversion
+  function getTime(dateString) {
+    const date = new Date(dateString);
+
+    // Array of month abbreviations
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
   }
   return (
     <div
@@ -484,7 +621,7 @@ const Home = () => {
                             null ? (
                               <div>
                                 {showMediaChatPreview(
-                                  grp?.chat[grp.chat.length - 1]?.message
+                                  grp?.chat[grp.chat.length - 1]?.msgType
                                 )}
                               </div>
                             ) : (
@@ -569,7 +706,7 @@ const Home = () => {
                       }
                       className="w-13 h-13 rounded-full object-cover"
                     />
-                    <p>
+                    <p className="overflow-hidden text-ellipsis w-[60%]">
                       {
                         user?.group?.find((group) => group?.roomKey === groupNo)
                           ?.roomName
@@ -585,7 +722,7 @@ const Home = () => {
                     >
                       <img
                         src={videoCall}
-                        className="w-10 mr-1.5 cursor-pointer active:scale-90"
+                        className="w-6 md:w-10 mr-1.5 cursor-pointer active:scale-90"
                       />
                     </button>
                     <button
@@ -594,7 +731,7 @@ const Home = () => {
                         e.preventDefault();
                       }}
                     >
-                      <img src={audioCall} className="w-9" />
+                      <img src={audioCall} className="w-6 md:w-9" />
                     </button>
                   </div>
                 </div>
@@ -656,19 +793,38 @@ const Home = () => {
                             m?.senderId === user?.id
                               ? "bg-gradient-to-r from-indigo-800  to-purple-800 rounded-tr-none"
                               : "bg-blue-950 rounded-tl-none"
-                          } w-fit rounded-xl `}
+                          } min-w-30 rounded-xl `}
                         >
                           <div className="">
                             <div className="text-xs italic text-amber-400 pl-2 pt-2 ">
-                              ~{m?.senderName && m.senderName}
+                              <p className="overflow-hidden text-ellipsis pr-2">
+                                ~{m?.senderName && m.senderName}
+                              </p>
                             </div>
                             {m.public_Id ? (
-                              <div className="p-2 rounded-2xl">
-                                {showMediaChat(m?.message)}
+                              <div className="px-2 pt-3 rounded-2xl relative">
+                                {showMediaChat(
+                                  m?.message,
+                                  m?.msgType,
+                                  m?.fileName
+                                )}
+                                <p className="font-extralight text-[0.7rem] text-end">
+                                  {getTime(m?.time)}
+                                </p>
+                                {loading.find((id) => id == m?.id) && (
+                                  <div className="absolute p-2 top-0 left-0 h-full w-full  flex justify-center items-center ">
+                                    <div className="w-10 h-10 border-5 border-transparent animate-spin  border-t-red-400 rounded-full" />
+                                  </div>
+                                )}
                               </div>
                             ) : (
-                              <div className="whitespace-pre-wrap w-fit px-5 py-2">
-                                {m?.message}
+                              <div className="px-1 pb-1">
+                                <p className="whitespace-pre-wrap w-fit px-5 pb-1">
+                                  {m?.message}
+                                </p>
+                                <p className="font-extralight text-[0.7rem] text-end">
+                                  {getTime(m?.time)}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -689,6 +845,12 @@ const Home = () => {
                                   id: toDeleteChat,
                                   roomKey: groupNo,
                                 };
+                                dispatch(
+                                  removeMessageFromGroup({
+                                    roomKey: groupNo,
+                                    id: toDeleteChat,
+                                  })
+                                );
                                 dispatch(deleteChat(body));
                               }}
                             />
@@ -730,11 +892,6 @@ const Home = () => {
                     }`}
                   >
                     {renderPreview()}
-                    {loading && (
-                      <div className="absolute h-full w-full flex justify-center items-center">
-                        <div className="w-10 h-10 border-5 border-transparent animate-spin  border-t-red-400 rounded-full" />
-                      </div>
-                    )}
                   </div>
                 </div>
                 <textarea
@@ -751,6 +908,11 @@ const Home = () => {
                   onChange={(e) => {
                     setMessage(e.target.value);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault(); // Prevents new line
+                      handleSendMessage(); // Call function to send message
+                    }}}
                 />
                 <button onClick={handleSendMessage}>
                   <img src={sendImg} className="h-8  mr-2 active:scale-90" />

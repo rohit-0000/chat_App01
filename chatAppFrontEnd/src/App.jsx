@@ -83,7 +83,7 @@ function App() {
     {
       path: "/home",
       element: token ? (
-        <div>
+        <div >
           <NavBar />
           <Home />
         </div>
@@ -125,7 +125,7 @@ function App() {
     const client = connectToAllRooms(
       roomIds,
       (roomId, message) => {
-        if (message.senderId !== user.id || message.public_Id !== null) {
+        if (message.senderId !== user.id) {
           dispatch(addMessageToGroup({ roomId, message }));
         }
       },

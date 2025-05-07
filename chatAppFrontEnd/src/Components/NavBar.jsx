@@ -33,24 +33,13 @@ const NavBar = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   dispatch(getUserDetail());
-  // }, []);
-
-  // useEffect(() => {
-  //   if (user?.group) {
-  //     user.group.forEach((group) => {
-  //         dispatch(getRoomMembers(group?.roomKey))
-  //       });
-  //     }
-  // }, [user]);
 
   return (
     <div
       ref={navBarRef}
       className={`${
         isNavBarExpanded ? "w-[200px]" : "w-14"
-      } h-screen border-r fixed top-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
+      } h-screen border-r fixed bottom-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
     >
       {/* Upper Nav */}
       <div className="flex flex-col gap-5 w-full ">

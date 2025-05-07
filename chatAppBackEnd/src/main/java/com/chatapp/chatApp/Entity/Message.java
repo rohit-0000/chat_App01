@@ -29,6 +29,8 @@ public class Message {
     private String message;
     private String public_Id;
     private LocalDateTime time;
+    private String msgType;
+    private String fileName;
 
 
     public Message(ObjectId senderId,String message){
