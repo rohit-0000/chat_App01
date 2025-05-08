@@ -39,7 +39,7 @@ const NavBar = () => {
       ref={navBarRef}
       className={`${
         isNavBarExpanded ? "w-[200px]" : "w-14"
-      } h-screen border-r fixed bottom-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear`}
+      } h-screen border-r fixed bottom-0 left-0 flex flex-col items-start justify-between py-5 z-50 bg-slate-950 transition-all duration-200 ease-linear overflow-hidden`}
     >
       {/* Upper Nav */}
       <div className="flex flex-col gap-5 w-full ">
@@ -130,7 +130,7 @@ const NavBar = () => {
         </NavLink>
         {/* Logout */}
         <div
-          className={`flex justify-center gap-2 items-center cursor-pointer hover:bg-red-500 rounded  active:scale-95   ${
+          className={`flex justify-center gap-2 items-center cursor-pointer  hover:bg-red-500 rounded  active:scale-95  ${
             isNavBarExpanded ? " justify-start mx-2 " : "w-fit self-center"
           } `}
           onClick={HandleLogOut}
@@ -141,7 +141,7 @@ const NavBar = () => {
               isNavBarExpanded
                 ? "opacity-100 w-fit block"
                 : "opacity-0 w-0 absolute"
-            } transition-all duration-100 ease-linear`}
+            } transition-all duration-100 ease-linear `}
           >
             {" "}
             Logout

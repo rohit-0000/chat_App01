@@ -7,7 +7,7 @@ const joinGroup = (props) => {
     const dispatch=useDispatch();
 
     function handleJoinRoom(data) {
-      dispatch(joinRoom(data.roomKey));
+      dispatch(joinRoom(data.roomKey))
       props.setRoomJoinForm(false);
     }
     const {

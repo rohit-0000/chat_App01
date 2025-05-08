@@ -134,19 +134,11 @@ const Home = () => {
       setPreview(null);
       fileInputRef.current.value = "";
 
-      dispatch(sendChatMedia({ MediaData: formData, groupId: groupNo }))
-        .unwrap()
-        .then((response) => {
-          const [newMessage, public_ID] = response;
-          console.log("Backend response:", response);
-          const updatedMsg = {
-            ...msg,
-            message: newMessage,
-            public_Id: public_ID,
-          };
-          sendMessage(groupNo, updatedMsg);
-          setLoading((load) => load.filter((id) => id != updatedMsg.id));
-        });
+      dispatch(
+        sendChatMedia({ MediaData: formData, groupId: groupNo, message: msg })
+      );
+
+      setLoading((load) => load.filter((id) => id != msg.id));
     } else {
       const msg = {
         id: new ObjectID().toHexString(),
@@ -386,13 +378,14 @@ const Home = () => {
               }}
               alt="Download"
             />
-          <a
-            download={name}
-            href={url}
-            className="bg-blue-400 rounded-2xl p-4 block"
-          >
-            <p>{name}</p>
-          </a></div>
+            <a
+              download={name}
+              href={url}
+              className="bg-blue-400 rounded-2xl p-4 block"
+            >
+              <p>{name}</p>
+            </a>
+          </div>
         );
       else
         return (
@@ -419,8 +412,14 @@ const Home = () => {
     }
   }
 
-  function showMediaChatPreview(type) {
-    if (type === "image") {
+  function showMediaChatPreview(type,grp) {
+    if (type === "text") {
+      return (
+        <div className="text-sm text-ellipsis overflow-hidden whitespace-nowrap">
+          {grp?.chat[grp.chat.length - 1]?.message}
+        </div>
+      );
+    } else if (type === "image") {
       return (
         <div className="flex gap-1">
           <img src={imgPrev} className="w-4" />
@@ -448,7 +447,7 @@ const Home = () => {
           <p>PDF file</p>
         </div>
       );
-    } else {
+    } else if(type==="unknown"){
       return (
         <div className="flex gap-1">
           <img src={filePrev} className="w-4" />
@@ -617,18 +616,11 @@ const Home = () => {
                         <div className="w-full overflow-hidden">
                           <div className="font-bold">{grp.roomName}</div>
                           <div className="text-sm text-ellipsis overflow-hidden whitespace-nowrap">
-                            {grp?.chat[grp.chat.length - 1]?.public_Id !==
-                            null ? (
-                              <div>
-                                {showMediaChatPreview(
-                                  grp?.chat[grp.chat.length - 1]?.msgType
-                                )}
-                              </div>
-                            ) : (
-                              <div className="text-sm text-ellipsis overflow-hidden whitespace-nowrap">
-                                {grp?.chat[grp.chat.length - 1]?.message}
-                              </div>
-                            )}
+                            <div>
+                              {showMediaChatPreview(
+                                grp?.chat[grp.chat.length - 1]?.msgType,grp
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -722,11 +714,11 @@ const Home = () => {
                     >
                       <img
                         src={videoCall}
-                        className="w-6 md:w-10 mr-1.5 cursor-pointer active:scale-90"
+                        className="w-6 md:w-9 mr-1.5 cursor-pointer active:scale-90"
                       />
                     </button>
                     <button
-                      className=" pl-1.5 cursor-pointer border-l border-gray-500 active:scale-90"
+                      className=" pl-1.5 cursor-pointer  border-gray-500 active:scale-90"
                       onClick={(e) => {
                         e.preventDefault();
                       }}
@@ -912,7 +904,8 @@ const Home = () => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault(); // Prevents new line
                       handleSendMessage(); // Call function to send message
-                    }}}
+                    }
+                  }}
                 />
                 <button onClick={handleSendMessage}>
                   <img src={sendImg} className="h-8  mr-2 active:scale-90" />

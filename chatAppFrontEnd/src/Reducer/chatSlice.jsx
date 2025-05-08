@@ -411,9 +411,13 @@ export const deleteGroup = createAsyncThunk(
 
 export const sendChatMedia = createAsyncThunk(
   "send/chatmedia",
-  async ({ MediaData, groupId }, { rejectWithValue }) => {
+  async ({ MediaData, groupId,message }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("chatAppToken");
+      MediaData.append(
+        "message",
+        new Blob([JSON.stringify(message)], { type: "application/json" })
+      );
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/sendChatMedia/${groupId}`,
         MediaData,

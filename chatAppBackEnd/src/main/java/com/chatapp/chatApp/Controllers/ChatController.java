@@ -19,6 +19,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,16 +51,21 @@ public class ChatController {
         return message;
     }
 
+    @Transactional
     @PostMapping("/sendChatMedia/{groupId}")
-    public ResponseEntity<?> uploadChatFile(@RequestParam("chatFile") MultipartFile chatFile,@PathVariable String groupId ){
+    public ResponseEntity<?> uploadChatFile(@RequestParam("chatFile") MultipartFile chatFile, @RequestPart("message") Message message,@PathVariable String groupId ){
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user=userServices.findByUsername(userName);
 
         try{
             List<String> fileID =imageService.uploadFile(chatFile);
-            if (fileID.isEmpty()) return new ResponseEntity<>("UnAuthorized to change group image",HttpStatus.BAD_REQUEST);
-            return new ResponseEntity<>(fileID,HttpStatus.OK);
+            if (fileID.isEmpty()) return new ResponseEntity<>("Error in sending email",HttpStatus.BAD_REQUEST);
+            message.setMessage(fileID.get(0));
+            message.setPublic_Id(fileID.get(1));
+//            simpMessagingTemplate.convertAndSend("/topic/room/"+groupId,message);
+            sendMessage(groupId,message);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         catch(IOException e){
             return new ResponseEntity<>("Failed to send file",HttpStatus.INTERNAL_SERVER_ERROR);
