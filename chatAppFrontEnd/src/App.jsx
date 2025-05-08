@@ -150,14 +150,16 @@ function App() {
       setLoading(true);
       dispatch(getUserDetail());
     }
+    setLoading(false);
   }, [token]);
 
   useEffect(() => {
+    setLoading(true);
     if (user?.group) {
       user.group.forEach((group) => {
         dispatch(getRoomMembers(group?.roomKey));
-        setLoading(false);
       });
+      setLoading(false);  
     }
   }, [user]);
   return loading && token != null ? (
